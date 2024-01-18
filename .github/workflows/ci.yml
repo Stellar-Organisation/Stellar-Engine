@@ -32,17 +32,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install xmake
+      ## install scoop for windows and install xmake
+      - name: Install scoop
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
-          xmake --version
+          iex (new-object net.webclient).downloadstring('https://get.scoop.sh')
+          scoop install xmake
 
       - name: Install xmake
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
-          sudo apt-get install -y xmake
-          xmake --version
+          sudo add-apt-repository ppa:xmake-io/xmake
+          sudo apt update
+          sudo apt install xmake
 
       - name: Install xmake
         if: ${{ matrix.os == 'macos-latest' }}
