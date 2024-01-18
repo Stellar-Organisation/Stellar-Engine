@@ -85,6 +85,10 @@ jobs:
         run: |
           xmake f -p ${{matrix.os}} -m ${{matrix.build_type}} --verbose -y
 
+      - name: Build Xmake
+        run: |
+          xmake -v -a ${{matrix.arch}} -j 4
+
       - name: Unix - Test and coverage
         working-directory: ./build
         run: |
