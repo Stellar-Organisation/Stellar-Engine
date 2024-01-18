@@ -11,7 +11,7 @@
 #
 name: "CodeQL"
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 
 jobs:
@@ -30,76 +30,91 @@ jobs:
         compiler:
           - gcc-11
         generator:
-          - "Unix Makefiles"
+          - "Ninja"
         build_type:
           - Debug
-        packaging_maintainer_mode:
-          - ON
 
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Setup Cache
-      uses: ./.github/actions/setup_cache
-      with:
-        compiler: ${{ matrix.compiler }}
-        build_type: ${{ matrix.build_type }}
-        packaging_maintainer_mode: ${{ matrix.packaging_maintainer_mode }}
-        generator: ${{ matrix.generator }}
+      - name: Setup Cache
+        uses: ./.github/actions/setup_cache
+        with:
+          compiler: ${{ matrix.compiler }}
+          build_type: ${{ matrix.build_type }}
+          packaging_maintainer_mode: ${{ matrix.packaging_maintainer_mode }}
+          generator: ${{ matrix.generator }}
 
-    - name: Project Name
-      uses: cardinalby/export-env-action@v2
-      with:
-        envFile: '.github/constants.env'
+      - name: Project Name
+        uses: cardinalby/export-env-action@v2
+        with:
+          envFile: '.github/constants.env'
 
-    - name: Setup Cpp
-      uses: aminya/setup-cpp@v1
-      with:
-        compiler: ${{ matrix.compiler }}
-        vcvarsall: ${{ contains(matrix.os, 'windows' )}}
-        cmake: true
-        ccache: true
-        clangtidy: false
-        cppcheck: false
-        gcovr: true
-        opencppcoverage: true
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ matrix.compiler }}
+          vcvarsall: ${{ contains(matrix.os, 'windows' )}}
+          ccache: true
+          clangtidy: false
+          cppcheck: false
+          gcovr: true
+          opencppcoverage: true
 
-      # make sure coverage is only enabled for Debug builds, since it sets -O0 to make sure coverage
-      # has meaningful results
-    - name: Configure CMake
-      run: |
-        cmake -S . -B ./build -G "${{matrix.generator}}" -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }}
+        - name: Install xmake
+          if: ${{ matrix.os == 'windows-latest' }}
+          run: |
+            Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
+            xmake --version
 
-    # Initializes the CodeQL tools for scanning.
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: ${{ matrix.language }}
-        # If you wish to specify custom queries, you can do so here or in a config file.
-        # By default, queries listed here will override any specified in a config file.
-        # Prefix the list here with "+" to use these queries and those in the config file.
-        # queries: ./path/to/local/query, your-org/your-repo/queries@main
+        - name: Install xmake
+          if: ${{ matrix.os == 'ubuntu-latest' }}
+          run: |
+            sudo apt-get install -y xmake
+            xmake --version
 
-    - name: Build
-      # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: |
-        cmake --build ./build --config ${{matrix.build_type}}
+        - name: Install xmake
+          if: ${{ matrix.os == 'macos-latest' }}
+          run: |
+            brew install xmake
+            xmake --version
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
+        # make sure coverage is only enabled for Debug builds, since it sets -O0 to make sure coverage
+        # has meaningful results
+      - name: Configure CMake
+        run: |
+          xmake f -p ${{matrix.os}} -a ${{matrix.arch}} -m ${{matrix.build_type}} --verbose
 
-    - name: Unix - Test and coverage
-      working-directory: ./build
-      run: |
-        ctest -C ${{matrix.build_type}}
-        gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable 'gcov'
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+          # If you wish to specify custom queries, you can do so here or in a config file.
+          # By default, queries listed here will override any specified in a config file.
+          # Prefix the list here with "+" to use these queries and those in the config file.
+          # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
-    - name: Publish to codecov
-      uses: codecov/codecov-action@v3
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      with:
-        flags: ${{ runner.os }}
-        name: ${{ runner.os }}-coverage
-        files: ./build/coverage.xml
+      - name: Build
+        # Execute the build.  You can specify a specific target with "--target <NAME>"
+        run: |
+          xmake build -v
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+      - name: Unix - Test and coverage
+        working-directory: ./build
+        run: |
+          ctest -C ${{matrix.build_type}}
+          gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable 'gcov'
+
+      - name: Publish to codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          flags: ${{ runner.os }}
+          name: ${{ runner.os }}-coverage
+          files: ./build/coverage.xml

@@ -4,15 +4,10 @@ on:
     branches:
       - main
       - dev
-  push:
-    branches:
-      - main
-      - dev
 
 env:
   CLANG_TIDY_VERSION: "15.0.2"
   VERBOSE: 1
-
 
 jobs:
   Test:
@@ -20,56 +15,39 @@ jobs:
     strategy:
       fail-fast: false
 
-      # Recommendations:
-      #   * support at least 2 operating systems
-      #   * support at least 2 compilers
-      #   * make sure all supported configurations for your project are built
-      #
-      # Disable/enable builds in this list to meet the above recommendations
-      # and your own projects needs
       matrix:
         os:
           - ubuntu-latest
           - macos-latest
+          - windows-latest
         compiler:
           - gcc-11
         generator:
-          - "Unix Makefiles"
+          - "Ninja"
         build_type:
           - Release
-        packaging_maintainer_mode:
-          - ON
-          - OFF
-        build_shared:
-          - OFF
-
-        include:
-          # Add appropriate variables for gcov version required. This will intentionally break
-          # if you try to use a compiler that does not have gcov set
-          - compiler: gcc-11
-            gcov_executable: gcov
-            enable_ipo: On
-
-          - os: macos-latest
-            enable_ipo: Off
-
-          # Set up preferred package generators, for given build configurations
-          - build_type: Release
-            packaging_maintainer_mode: OFF
-            package_generator: TBZ2
-
-          # This exists solely to make sure a non-multiconfig build works
-          - os: ubuntu-latest
-            compiler: gcc-11
-            generator: "Unix Makefiles"
-            build_type: Debug
-            gcov_executable: gcov
-            packaging_maintainer_mode: On
-            enable_ipo: Off
-
+          - Debug
 
     steps:
       - uses: actions/checkout@v3
+
+      - name: Install xmake
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
+          xmake --version
+
+      - name: Install xmake
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          sudo apt-get install -y xmake
+          xmake --version
+
+      - name: Install xmake
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          brew install xmake
+          xmake --version
 
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
@@ -84,37 +62,30 @@ jobs:
         with:
           envFile: '.github/constants.env'
 
-
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
           compiler: ${{ matrix.compiler }}
-          cmake: true
           make: true
           ccache: true
           clangtidy: ${{ env.CLANG_TIDY_VERSION }}
           cppcheck: true
           gcovr: true
-          opencppcoverage: true 
+          opencppcoverage: true
 
       - name: Run script macOS
-        if : ${{ matrix.os == 'macos-latest' }}
+        if: ${{ matrix.os == 'macos-latest' }}
         run: bash scripts/macos.sh
 
       - name: Run script Linux
-        if : ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: bash scripts/linux.sh
 
-      - name: Configure CMake
+      - name: Configure Xmake
         run: |
-          cmake -S . -B ./build -G "${{matrix.generator}}" -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }} -DGIT_SHA:STRING=${{ github.sha }}
-
-      - name: Build
-        run: |
-          cmake --build ./build --config ${{matrix.build_type}} --parallel ${{env.nproc}}
+          xmake f -p ${{matrix.os}} -m ${{matrix.build_type}} --verbose -y
 
       - name: Unix - Test and coverage
         working-directory: ./build
         run: |
-          ctest -C ${{matrix.build_type}}
-          gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable '${{ matrix.gcov_executable }}'
+          xmake run test
