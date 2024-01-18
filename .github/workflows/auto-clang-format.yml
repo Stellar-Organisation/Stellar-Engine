@@ -7,12 +7,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
     - uses: DoozyX/clang-format-lint-action@v0.13
       with:
         source: '.'
         extensions: 'cpp,hpp'
-        clangFormatVersion: 15
+        clangFormatVersion: 16
         inplace: True
+
     - uses: EndBug/add-and-commit@v4
       with:
         author_name: Clang Robot

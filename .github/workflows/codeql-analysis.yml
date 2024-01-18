@@ -60,25 +60,24 @@ jobs:
           clangtidy: false
           cppcheck: false
           gcovr: true
-          opencppcoverage: true
 
-        - name: Install xmake
-          if: ${{ matrix.os == 'windows-latest' }}
-          run: |
-            Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
-            xmake --version
+      - name: Install xmake
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          Invoke-Expression (Invoke-Webrequest 'https://xmake.io/psget.text' -UseBasicParsing).Content
+          xmake --version
 
-        - name: Install xmake
-          if: ${{ matrix.os == 'ubuntu-latest' }}
-          run: |
-            sudo apt-get install -y xmake
-            xmake --version
+      - name: Install xmake
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: |
+          sudo apt-get install -y xmake
+          xmake --version
 
-        - name: Install xmake
-          if: ${{ matrix.os == 'macos-latest' }}
-          run: |
-            brew install xmake
-            xmake --version
+      - name: Install xmake
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          brew install xmake
+          xmake --version
 
         # make sure coverage is only enabled for Debug builds, since it sets -O0 to make sure coverage
         # has meaningful results
@@ -91,15 +90,15 @@ jobs:
         uses: github/codeql-action/init@v2
         with:
           languages: ${{ matrix.language }}
-          # If you wish to specify custom queries, you can do so here or in a config file.
-          # By default, queries listed here will override any specified in a config file.
-          # Prefix the list here with "+" to use these queries and those in the config file.
-          # queries: ./path/to/local/query, your-org/your-repo/queries@main
+
+      - name: Configure Xmake
+        run: |
+          xmake f -p ${{matrix.os}} -m ${{matrix.build_type}} --verbose -y
 
       - name: Build
         # Execute the build.  You can specify a specific target with "--target <NAME>"
         run: |
-          xmake build -v
+          xmake build -v -a ${{matrix.arch}} -j 4
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
@@ -107,14 +106,4 @@ jobs:
       - name: Unix - Test and coverage
         working-directory: ./build
         run: |
-          ctest -C ${{matrix.build_type}}
-          gcovr -j ${{env.nproc}} --delete --root ../ --print-summary --xml-pretty --xml coverage.xml . --gcov-executable 'gcov'
-
-      - name: Publish to codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        with:
-          flags: ${{ runner.os }}
-          name: ${{ runner.os }}-coverage
-          files: ./build/coverage.xml
+          xmake run test
