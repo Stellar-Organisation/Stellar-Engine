@@ -1,10 +1,3 @@
-/*
-** EPITECH PROJECT, 2023
-** ECS
-** File description:
-** World
-*/
-
 #include "World.hpp"
 #include <algorithm>
 #include <cstddef>
