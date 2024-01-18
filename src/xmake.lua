@@ -1,5 +1,5 @@
 -- Add boost packages
-add_requires("boost")
+add_requires("boost", "spdlog", {system = false})
 
 -- Create the Stellar-Engine project
 target("Stellar-Engine")
@@ -17,7 +17,7 @@ target("Stellar-Engine")
     set_targetdir("../bin")
 
     -- Add the boost packages
-    add_packages("boost")
+    add_packages("boost", "spdlog")
 
     -- Add the include directories
     add_includedirs("../includes", "../includes/Core", "../includes/Core/Components", "../includes/Core/Events", "../includes/Core/Systems", {public = true})

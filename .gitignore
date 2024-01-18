@@ -10,6 +10,7 @@ patat*
 log.txt
 *gcno
 tests
+compile_commands.json
 
 # User spesific settings
 CMakeUserPresets.json
