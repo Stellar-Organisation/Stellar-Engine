@@ -1,5 +1,5 @@
 -- Add the packages required
-add_requires("catch2", "boost", "fmt")
+add_requires("catch2", "boost", "fmt", "spdlog", {system = false})
 
 -- Create the Stellar-Engine-Test project
 target("test")
@@ -23,4 +23,4 @@ target("test")
     add_includedirs("../includes", "../includes/Core", "../includes/Core/Components", "../includes/Core/Events", "../includes/Core/Systems", {public = true})
 
     -- Add the packages required
-    add_packages("catch2", "boost", "fmt")
+    add_packages("catch2", "boost", "fmt", "spdlog")
