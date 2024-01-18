@@ -71,11 +71,11 @@ jobs:
 
       - name: Configure Xmake
         run: |
-          xmake f -p ${{matrix.os}} -m ${{matrix.build_type}} --verbose -y
+          xmake f -m ${{matrix.build_type}} --verbose -y
 
       - name: Build Xmake
         run: |
-          xmake -v -a ${{matrix.arch}} -j 4
+          xmake -v -j $(nproc)
 
       - name: Unix - Test and coverage
         working-directory: ./build
