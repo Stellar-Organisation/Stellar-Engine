@@ -43,11 +43,9 @@ jobs:
           cppcheck: false
           gcovr: true
 
-      - name: Install xmake
-        run: |
-          sudo add-apt-repository ppa:xmake-io/xmake
-          sudo apt update
-          sudo apt install xmake
+      - uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
