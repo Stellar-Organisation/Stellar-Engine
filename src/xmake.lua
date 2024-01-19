@@ -26,7 +26,7 @@ target("Stellar-Engine")
     add_syslinks("pthread")
 
     -- Set the warnings to all (-Wall)
-    set_warnings("all", "pedantic", "extra")
+    set_warnings("allextra", "pedantic", "more")
 
     -- Set the build modes
     -- If the mode is debug, set the optimization to none and the symbols to debug

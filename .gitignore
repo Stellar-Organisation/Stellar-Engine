@@ -43,3 +43,6 @@ ehthumbs.db
 Thumbs.db
 .xmake
 bin
+
+/documentation
+doxyfile
