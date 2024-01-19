@@ -19,9 +19,8 @@ runs:
       with:
         path: |
             ${{ env.HOME }}/.ccache
-            ${{ env.HOME }}/.xmake-cache
-            ${{ env.HOME }}/.xmake
             ${{ env.HOME }}/.cache
-        key: ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}}}
+            .xmake-cache
+        key: ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}
         restore-keys: |
           ${{ runner.os }}-${{ inputs.compiler }}-${{ inputs.build_type }}

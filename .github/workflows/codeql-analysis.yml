@@ -45,6 +45,7 @@ jobs:
       - uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: latest
+          actions-cache-folder: '.xmake-cache'
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
@@ -52,8 +53,14 @@ jobs:
           languages: ${{ matrix.language }}
 
       - name: Configure Xmake
+        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           xmake f -m ${{matrix.build_type}} --verbose -y
+
+      - name: Configure Xmake
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          xmake f -m ${{matrix.build_type}} --verbose -y --toolchain=llvm --sdk=C:\Users\runneradmin\llvm\bin
 
       - name: Build
         run: |
