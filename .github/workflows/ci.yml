@@ -32,7 +32,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: MinoruSekine/setup-scoop@v2
+      - name: Install scoop
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/setup-scoop@v1
 
       - name: Install xmake
         if: ${{ matrix.os == 'windows-latest' }}

@@ -13,6 +13,9 @@ target("Stellar-Engine")
     -- Add the source files
     add_files("**.cpp")
 
+    -- Add the -std=c++20 flag
+    add_cxxflags("-std=c++20", "-stdlib=libc++")
+
     -- Set the target directory to bin/tests
     set_targetdir("../bin")
 
