@@ -11,6 +11,7 @@ log.txt
 *gcno
 tests
 compile_commands.json
+makefile
 
 # User spesific settings
 CMakeUserPresets.json
