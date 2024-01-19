@@ -68,6 +68,11 @@ jobs:
         run: |
           xmake f -m ${{matrix.build_type}} --verbose -y
 
+      - name: Configure Xmake
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          xmake f -m ${{matrix.build_type}} --verbose -y --toolchain=llvm --sdk=C:\Users\runneradmin\llvm\bin
+
       - name: Build Xmake
         run: |
           xmake -v -j 4
