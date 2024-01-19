@@ -1,8 +1,6 @@
 set_project("Stellar-Engine")
 
-add_requires("llvm >= 16.x", {alias = "llvm"})
-
-set_toolchains("llvm@llvm")
+add_toolchains("llvm")
 set_languages("cxx20")
 
 add_rules("mode.debug", "mode.release")
