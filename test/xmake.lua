@@ -10,9 +10,6 @@ target("test")
     -- Set the target directory to bin/tests
     set_targetdir("../bin")
 
-    -- Set the C++ standard to C++20
-    set_languages("cxx20")
-
     -- Add the -std=c++20 flag
     add_cxxflags("-std=c++20", "-lstdc++")
 

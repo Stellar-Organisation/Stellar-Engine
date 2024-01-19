@@ -7,9 +7,6 @@ target("Stellar-Engine")
     -- Set the project kind to static
     set_kind("static")
 
-    -- Set the C++ standard to C++20
-    set_languages("cxx20")
-
     -- Add the source files
     add_files("**.cpp")
 

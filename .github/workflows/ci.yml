@@ -6,7 +6,7 @@ on:
       - dev
 
 env:
-  CLANG_TIDY_VERSION: "15.0.0"
+  CLANG_TIDY_VERSION: "16.0.0"
   VERBOSE: 1
 
 jobs:
@@ -19,10 +19,8 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-          - windows-latest
         compiler:
-          - gcc-13
-          - llvm-17
+          - llvm-16
         generator:
           - "Ninja"
         build_type:
@@ -59,17 +57,28 @@ jobs:
         with:
           compiler: ${{ matrix.compiler }}
           build_type: ${{ matrix.build_type }}
-          packaging_maintainer_mode: ${{ matrix.packaging_maintainer_mode }}
           generator: ${{ matrix.generator }}
 
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
+        if: ${{ matrix.os != 'macos-latest' }}
         with:
           compiler: ${{ matrix.compiler }}
           cmake: true
           make: true
           ccache: true
           clangtidy: ${{ env.CLANG_TIDY_VERSION }}
+          cppcheck: true
+
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        if: ${{ matrix.os == 'macos-latest' }}
+        with:
+          compiler: ${{ matrix.compiler }}
+          cmake: true
+          make: true
+          ccache: true
+          clangtidy: 15.0.0
           cppcheck: true
 
       - name: Configure Xmake
