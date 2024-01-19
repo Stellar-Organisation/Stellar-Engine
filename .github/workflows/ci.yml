@@ -34,7 +34,7 @@ jobs:
 
       - name: Install scoop
         if: ${{ matrix.os == 'windows-latest' }}
-        uses: actions/setup-scoop@v1
+        uses: MinoruSekine/setup-scoop@v2
 
       - name: Install xmake
         if: ${{ matrix.os == 'windows-latest' }}
