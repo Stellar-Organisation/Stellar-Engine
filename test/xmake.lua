@@ -14,7 +14,7 @@ target("test")
     set_languages("cxx20")
 
     -- Add the -std=c++20 flag
-    add_cxxflags("-std=c++20", "-stdlib=libc++")
+    add_cxxflags("-std=c++20", "-lstdc++")
 
     -- Add the source files
     add_files("**.cpp")
