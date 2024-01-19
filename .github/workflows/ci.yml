@@ -20,7 +20,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
         compiler:
-          - llvm-16
+          - llvm
         generator:
           - "Ninja"
         build_type:

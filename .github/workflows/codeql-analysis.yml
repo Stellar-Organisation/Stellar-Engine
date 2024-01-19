@@ -16,7 +16,7 @@ jobs:
       matrix:
         language: [ 'cpp' ]
         compiler:
-          - gcc-13
+          - llvm
         generator:
           - "Ninja"
         build_type:
