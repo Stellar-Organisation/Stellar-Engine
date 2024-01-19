@@ -62,7 +62,8 @@ namespace Engine::Core {
                     {
                         for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
                             if (_world.get().template hasComponents<Components...>(idx)) {
-                                func(_world.get(), deltaTime, idx, _world.get().template getComponent<Components>().get(idx)...);
+                                func(_world.get(), deltaTime, idx,
+                                     _world.get().template getComponent<Components>().get(idx)...);
                             }
                         }
                     }
@@ -85,7 +86,8 @@ namespace Engine::Core {
 
                         for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
                             if (_world.get().template hasComponents<Components...>(idx)) {
-                                entities.emplace_back(idx, _world.get().template getComponent<Components>().get(idx)...);
+                                entities.emplace_back(idx,
+                                                      _world.get().template getComponent<Components>().get(idx)...);
                             }
                         }
                         return entities;
