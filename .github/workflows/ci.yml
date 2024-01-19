@@ -19,6 +19,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
+          - windows-latest
         compiler:
           - llvm
         generator:
@@ -33,7 +34,6 @@ jobs:
       - uses: xmake-io/github-action-setup-xmake@v1
         with:
           xmake-version: latest
-          actions-cache-folder: '.xmake-cache'
 
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
