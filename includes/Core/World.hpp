@@ -61,8 +61,8 @@ namespace Engine::Core {
                             std::function<void(World &world, double deltaTime, std::size_t idx, Components &...)> func)
                     {
                         for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
-                            if (_world.get().hasComponents<Components...>(idx)) {
-                                func(_world.get(), deltaTime, idx, _world.get().getComponent<Components>().get(idx)...);
+                            if (_world.get().template hasComponents<Components...>(idx)) {
+                                func(_world.get(), deltaTime, idx, _world.get().template getComponent<Components>().get(idx)...);
                             }
                         }
                     }
@@ -72,7 +72,7 @@ namespace Engine::Core {
                         std::vector<std::size_t> entities;
 
                         for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
-                            if (_world.get().hasComponents<Components...>(idx)) {
+                            if (_world.get().template hasComponents<Components...>(idx)) {
                                 entities.emplace_back(idx);
                             }
                         }
@@ -84,8 +84,8 @@ namespace Engine::Core {
                         std::vector<std::tuple<std::size_t, Components &...>> entities;
 
                         for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
-                            if (_world.get().hasComponents<Components...>(idx)) {
-                                entities.emplace_back(idx, _world.get().getComponent<Components>().get(idx)...);
+                            if (_world.get().template hasComponents<Components...>(idx)) {
+                                entities.emplace_back(idx, _world.get().template getComponent<Components>().get(idx)...);
                             }
                         }
                         return entities;
@@ -93,7 +93,7 @@ namespace Engine::Core {
 
                     auto getComponentsOfEntity(std::size_t idx)
                     {
-                        return std::make_tuple(_world.get().getComponent<Components>().get(idx)...);
+                        return std::make_tuple(_world.get().template getComponent<Components>().get(idx)...);
                     }
             };
 
@@ -143,6 +143,11 @@ namespace Engine::Core {
 
                                                                 myComponent.erase(aIdx);
                                                             }));
+                for (std::size_t idx = 0; idx < _nextId; idx++) {
+                    auto &component = getComponent<Component>();
+
+                    component.init(idx);
+                }
                 return std::any_cast<SparseArray<Component> &>(_components[typeIndex].first);
             }
 
