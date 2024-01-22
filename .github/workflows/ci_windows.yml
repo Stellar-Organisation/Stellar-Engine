@@ -17,8 +17,7 @@ jobs:
 
       matrix:
         os:
-          - ubuntu-latest
-          - macos-latest
+          - windows-latest
         compiler:
           - llvm
         generator:
@@ -26,6 +25,11 @@ jobs:
         build_type:
           - Release
           - Debug
+        sys:
+          - mingw64
+          - mingw32
+          - ucrt64
+          - clang64
 
     steps:
       - uses: actions/checkout@v3
@@ -37,6 +41,9 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
 
+      - name: Add clang path to $PATH env
+        shell: bash
+        run: echo "PATH=$PATH:C:\msys64\mingw64\bin" >> $GITHUB_ENV
 
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
@@ -47,23 +54,11 @@ jobs:
 
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
-        if: ${{ matrix.os != 'macos-latest' }}
         with:
           compiler: ${{ matrix.compiler }}
           make: true
           ccache: true
           clangtidy: ${{ env.CLANG_TIDY_VERSION }}
-          cppcheck: true
-
-      - name: Setup Cpp
-        uses: aminya/setup-cpp@v1
-        if: ${{ matrix.os == 'macos-latest' }}
-        with:
-          compiler: ${{ matrix.compiler }}
-          cmake: true
-          make: true
-          ccache: true
-          clangtidy: 15.0.0
           cppcheck: true
 
       - name: Configure Xmake
