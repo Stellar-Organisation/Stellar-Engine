@@ -47,6 +47,7 @@ jobs:
         uses: aminya/setup-cpp@v1
         if: ${{ matrix.os != 'macos-latest' }}
         with:
+          compiler: ${{ matrix.compiler }}
           make: true
           ccache: true
           clangtidy: ${{ env.CLANG_TIDY_VERSION }}
@@ -56,19 +57,15 @@ jobs:
         uses: aminya/setup-cpp@v1
         if: ${{ matrix.os == 'macos-latest' }}
         with:
+          compiler: ${{ matrix.compiler }}
           cmake: true
           make: true
           ccache: true
           clangtidy: 15.0.0
           cppcheck: true
 
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "17.0"
-          directory: ${{ runner.temp }}/llvm
-
       - name: Configure Xmake
+        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           xmake f -m ${{matrix.build_type}} --verbose -y
 
