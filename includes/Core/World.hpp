@@ -31,8 +31,7 @@ namespace Engine::Core {
     {
         public:
             using id = std::size_t;
-            using containerFunc = std::function<void(World &, const id &)>;
-            using container = std::pair<std::any, std::tuple<containerFunc, containerFunc>>;
+            using container = std::unique_ptr<ISparseArray>;
             using containerMap = boost::container::flat_map<std::type_index, container>;
             using idsContainer = std::vector<id>;
             using systemFunc = std::unique_ptr<System>;
@@ -42,7 +41,7 @@ namespace Engine::Core {
         protected:
             containerMap _components;
             idsContainer _ids;
-            std::size_t _nextId = 0;
+            id _nextId = 0;
             systems _systems;
 
             template<ComponentConcept... Components>
@@ -133,24 +132,13 @@ namespace Engine::Core {
                 if (_components.find(typeIndex) != _components.end()) {
                     throw WorldExceptionComponentAlreadyRegistered("Component already registered");
                 }
-                _components[typeIndex] = std::make_pair(SparseArray<Component>(),
-                                                        std::make_tuple(
-                                                            [](World &aWorld, const std::size_t &aIdx) {
-                                                                auto &myComponent = aWorld.getComponent<Component>();
+                _components[typeIndex] = std::make_unique<SparseArray<Component>>();
 
-                                                                myComponent.init(aIdx);
-                                                            },
-                                                            [](World &aWorld, const std::size_t &aIdx) {
-                                                                auto &myComponent = aWorld.getComponent<Component>();
-
-                                                                myComponent.erase(aIdx);
-                                                            }));
                 for (std::size_t idx = 0; idx < _nextId; idx++) {
-                    auto &component = getComponent<Component>();
-
-                    component.init(idx);
+                    _components[typeIndex]->init(idx);
                 }
-                return std::any_cast<SparseArray<Component> &>(_components[typeIndex].first);
+
+                return static_cast<SparseArray<Component> &>(*_components[typeIndex]);
             }
 
             /**
@@ -178,7 +166,7 @@ namespace Engine::Core {
                 if (_components.find(typeIndex) == _components.end()) {
                     throw WorldExceptionComponentNotRegistered("Component not registered");
                 }
-                return std::any_cast<SparseArray<Component> &>(_components[typeIndex].first);
+                return static_cast<SparseArray<Component> &>(*_components[typeIndex]);
             }
 
             /**
@@ -195,7 +183,7 @@ namespace Engine::Core {
                 if (_components.find(typeIndex) == _components.end()) {
                     throw WorldExceptionComponentNotRegistered("Component not registered");
                 }
-                return std::any_cast<SparseArray<Component> const &>(_components.at(typeIndex).first);
+                return static_cast<SparseArray<Component> const &>(*_components.at(typeIndex));
             }
 
             /**
@@ -348,27 +336,6 @@ namespace Engine::Core {
             [[nodiscard]] std::size_t getCurrentId() const;
 
         protected:
-            /**
-             * @brief Get the Init Func used to init the component
-             *
-             * @param aTypeIndex The type index of the component
-             * @return containerFunc The init function
-             */
-            containerFunc getInitFunc(std::type_index aTypeIndex)
-            {
-                return std::get<0>(_components[aTypeIndex].second);
-            }
-
-            /**
-             * @brief Get the Erase Func used to erase the component
-             *
-             * @param aTypeIndex The type index of the component
-             * @return containerFunc The erase function
-             */
-            containerFunc getEraseFunc(std::type_index aTypeIndex)
-            {
-                return std::get<1>(_components[aTypeIndex].second);
-            }
 #pragma endregion methods
     };
 } // namespace Engine::Core

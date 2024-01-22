@@ -19,9 +19,7 @@ namespace Engine::Core {
         }
         spdlog::debug("Creating entity {}", newIdx);
         for (const auto &component : _components) {
-            auto initFunc = getInitFunc(component.first);
-
-            initFunc(*this, newIdx);
+            component.second->init(newIdx);
         }
         return newIdx;
     }
@@ -32,9 +30,7 @@ namespace Engine::Core {
         _ids.push_back(aIndex);
 
         for (const auto &component : _components) {
-            auto eraseFunc = getEraseFunc(component.first);
-
-            eraseFunc(*this, aIndex);
+            component.second->erase(aIndex);
         }
     }
 

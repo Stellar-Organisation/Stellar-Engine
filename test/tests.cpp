@@ -3,6 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include "Component.hpp"
 #include "ECS.hpp"
 #include <catch2/catch_test_macros.hpp>
 
@@ -55,6 +56,7 @@ struct hp1 : public Engine::Component
         explicit hp1(int aHp)
             : hp(aHp)
         {}
+
         int hp;
 };
 
