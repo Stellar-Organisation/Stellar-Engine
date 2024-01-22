@@ -120,7 +120,7 @@ namespace Engine::Core {
              */
             compRef get(vectIndex aIndex)
             {
-                if (aIndex >= _array.size() || aIndex < 0) {
+                if (aIndex >= _array.size()) {
                     throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
                 }
                 if (!_array[aIndex].has_value()) {
@@ -137,7 +137,7 @@ namespace Engine::Core {
              */
             void set(vectIndex aIndex, Component &&aValue)
             {
-                if (aIndex >= _array.size() || aIndex < 0) {
+                if (aIndex >= _array.size()) {
                     throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
                 }
                 _array[aIndex] = std::move(aValue);
@@ -168,7 +168,6 @@ namespace Engine::Core {
                 if (aIndex >= _array.size()) {
                     _array.resize(aIndex + 1, std::nullopt);
                 }
-                _array[aIndex] = std::nullopt;
             }
 
             /**
@@ -196,7 +195,7 @@ namespace Engine::Core {
              */
             void erase(vectIndex aIndex) override
             {
-                if (aIndex >= _array.size() || aIndex < 0) {
+                if (aIndex >= _array.size()) {
                     throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
                 }
                 _array[aIndex].reset();

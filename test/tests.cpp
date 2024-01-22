@@ -131,6 +131,16 @@ TEST_CASE("World", "[World]")
         REQUIRE(hp1Comp.hp == 10);
     }
 
+    SECTION("Register a component and create an entity, add the component then kill the entity")
+    {
+        world.registerComponent<hp1>();
+        auto entity = world.createEntity();
+        auto hp1Comp = world.addComponentToEntity(entity, hp1 {10});
+        REQUIRE(hp1Comp.hp == 10);
+        world.killEntity(entity);
+        REQUIRE_THROWS_AS(world.query<hp1>().getComponentsOfEntity(entity), Engine::Core::SparseArrayExceptionEmpty);
+    }
+
     SECTION("Register a component after having created an entity")
     {
         auto entity = world.createEntity();

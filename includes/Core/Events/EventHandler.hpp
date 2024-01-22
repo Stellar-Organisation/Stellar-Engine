@@ -8,13 +8,28 @@
 
 namespace Engine::Event {
 
+    class IEventHandler
+    {
+        public:
+            IEventHandler() = default;
+            virtual ~IEventHandler() = default;
+
+            IEventHandler(const IEventHandler &other) = default;
+            IEventHandler &operator=(const IEventHandler &other) = default;
+
+            IEventHandler(IEventHandler &&other) noexcept = default;
+            IEventHandler &operator=(IEventHandler &&other) noexcept = default;
+
+            virtual void clearEvents() = 0;
+    };
+
     /**
      * @brief Class that handle one type of event
      *
      * @tparam Event the type of event to handle
      */
     template<EventConcept Event>
-    class EventHandler
+    class EventHandler : public IEventHandler
     {
         public:
             using containerT = std::vector<Event>;
@@ -36,7 +51,7 @@ namespace Engine::Event {
              * @brief Destroy the Event Handler object
              *
              */
-            ~EventHandler() = default;
+            ~EventHandler() override = default;
 
             EventHandler(const EventHandler &aOther)
                 : _events(aOther._events)
@@ -103,7 +118,7 @@ namespace Engine::Event {
              * @brief Erase all the events
              * @details Can wait for the mutex to be unlocked
              */
-            void clearEvents()
+            void clearEvents() override
             {
                 std::lock_guard<std::mutex> lock(_mutex);
 
