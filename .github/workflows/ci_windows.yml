@@ -1,4 +1,4 @@
-name: ci
+name: ci_windows
 on:
   pull_request:
     branches:
@@ -40,6 +40,11 @@ jobs:
           actions-cache-folder: '.xmake-cache'
 
       - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{matrix.sys}}
+          install: >-
+            git
+            curl
 
       - name: Add clang path to $PATH env
         shell: bash
