@@ -42,10 +42,6 @@ jobs:
         with:
           version: "17.0"
 
-      - name: Add clang path to $PATH env
-        shell: bash
-        run: echo "PATH=$PATH:C:\msys64\mingw64\bin" >> $GITHUB_ENV
-
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
         with:
@@ -64,7 +60,8 @@ jobs:
 
       - name: Configure Xmake
         run: |
-          xmake f -m ${{matrix.build_type}} --verbose -y
+          xmake update -s dev
+          xmake f -m ${{matrix.build_type}} --verbose -y --toolchain=llvm --sdk=C:\Program Files\LLVM
 
       - name: Build Xmake
         run: |
