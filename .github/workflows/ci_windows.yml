@@ -26,9 +26,6 @@ jobs:
           - Release
           - Debug
         sys:
-          - mingw64
-          - mingw32
-          - ucrt64
           - clang64
 
     steps:
@@ -38,6 +35,9 @@ jobs:
         with:
           xmake-version: latest
           actions-cache-folder: '.xmake-cache'
+
+      - name: Setup Git for Windows' minimal SDK
+        uses: git-for-windows/setup-git-for-windows-sdk@v1
 
       - uses: msys2/setup-msys2@v2
         with:
