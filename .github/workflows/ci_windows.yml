@@ -53,10 +53,6 @@ jobs:
           build_type: ${{ matrix.build_type }}
           generator: ${{ matrix.generator }}
 
-      - name: Add LLVM to PATH
-        run: |
-          echo "::add-path::C:\Users\runneradmin\llvm\bin"
-
       - name: Configure Xmake
         run: |
           xmake update -s dev
