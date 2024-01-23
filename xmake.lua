@@ -1,6 +1,6 @@
 set_project("Stellar-Engine")
 
-add_toolchains("clang", "llvm")
+add_toolchains("clang")
 set_languages("cxx20")
 
 add_rules("mode.debug", "mode.release")

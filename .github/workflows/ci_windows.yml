@@ -18,8 +18,6 @@ jobs:
       matrix:
         os:
           - windows-latest
-        compiler:
-          - llvm
         generator:
           - "Ninja"
         build_type:
@@ -38,7 +36,6 @@ jobs:
         uses: aminya/setup-cpp@v1
         if: ${{ matrix.os != 'macos-latest' }}
         with:
-          compiler: ${{ matrix.compiler }}
           cmake: true
           make: true
           ccache: true
@@ -54,12 +51,10 @@ jobs:
 
       - name: Configure Xmake
         run: |
-          xmake f -m ${{matrix.build_type}} --verbose -y --toolchain=clang --sdk=C:\Users\runneradmin\llvm\bin
-
+          xmake f -m ${{matrix.build_type}} --verbose -y -p windows
       - name: Build Xmake
         run: |
           xmake -v -j 4
-
       - name: Unix - Test and coverage
         working-directory: ./build
         run: |
