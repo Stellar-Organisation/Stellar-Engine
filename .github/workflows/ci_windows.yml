@@ -25,8 +25,6 @@ jobs:
         build_type:
           - Release
           - Debug
-        sys:
-          - clang64
 
     steps:
       - uses: actions/checkout@v3
@@ -39,12 +37,10 @@ jobs:
       - name: Setup Git for Windows' minimal SDK
         uses: git-for-windows/setup-git-for-windows-sdk@v1
 
-      - uses: msys2/setup-msys2@v2
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1
         with:
-          msystem: ${{matrix.sys}}
-          install: >-
-            git
-            curl
+          version: "17.0"
 
       - name: Add clang path to $PATH env
         shell: bash
