@@ -23,7 +23,11 @@ target("Stellar-Engine")
     add_includedirs("../includes", "../includes/Core", "../includes/Core/Components", "../includes/Core/Events", "../includes/Core/Systems", {public = true})
 
     -- Add the system libraries
-    add_syslinks("pthread")
+    if is_plat("windows") then
+        add_syslinks("ws2_32", "user32", "gdi32", "winspool", "shell32", "ole32", "oleaut32", "uuid", "comdlg32", "advapi32")
+    else
+        add_syslinks("pthread")
+    end
 
     -- Set the warnings to all (-Wall)
     set_warnings("allextra", "pedantic", "more")
