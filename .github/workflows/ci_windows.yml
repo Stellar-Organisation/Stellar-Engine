@@ -37,10 +37,14 @@ jobs:
       - name: Setup Git for Windows' minimal SDK
         uses: git-for-windows/setup-git-for-windows-sdk@v1
 
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        if: ${{ matrix.os != 'macos-latest' }}
         with:
-          version: "17.0"
+          compiler: ${{ matrix.compiler }}
+          ccache: true
+          clangtidy: ${{ env.CLANG_TIDY_VERSION }}
+          cppcheck: true
 
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
@@ -49,10 +53,14 @@ jobs:
           build_type: ${{ matrix.build_type }}
           generator: ${{ matrix.generator }}
 
+      - name: Add LLVM to PATH
+        run: |
+          echo "::add-path::C:\Users\runneradmin\llvm\bin"
+
       - name: Configure Xmake
         run: |
           xmake update -s dev
-          xmake f -m ${{matrix.build_type}} --verbose -y --toolchain=clang
+          xmake f -m ${{matrix.build_type}} --verbose -y --toolchain=clang --sdk=C:\Users\runneradmin\llvm\bin
 
       - name: Build Xmake
         run: |
