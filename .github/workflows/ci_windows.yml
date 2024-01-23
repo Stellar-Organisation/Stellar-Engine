@@ -37,11 +37,6 @@ jobs:
       - name: Setup Git for Windows' minimal SDK
         uses: git-for-windows/setup-git-for-windows-sdk@v1
 
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v1
-        with:
-          version: "17.0"
-
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
         with:
@@ -61,7 +56,7 @@ jobs:
       - name: Configure Xmake
         run: |
           xmake update -s dev
-          xmake f -m ${{matrix.build_type}} --verbose -y --toolchain=llvm --sdk=C:\Program Files\LLVM
+          xmake f -m ${{matrix.build_type}} --verbose -y --toolchain=llvm --sdk=C:\Users\runneradmin\llvm\bin
 
       - name: Build Xmake
         run: |
