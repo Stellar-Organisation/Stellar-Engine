@@ -2,7 +2,8 @@
 #define EVENTMANAGER_HPP
 
 #include <cstddef>
-#include <thread>
+#include <iostream>
+#include <memory>
 #include <typeindex>
 #include <utility>
 #include <vector>
@@ -25,8 +26,6 @@ namespace Engine::Event {
             using eventHandler = std::unique_ptr<IEventHandler>;
 
         private:
-            EventManager();
-
             boost::container::flat_map<std::type_index, eventHandler> _eventsHandler;
             std::mutex _mutex;
 
@@ -36,6 +35,7 @@ namespace Engine::Event {
              * @brief Destroy the Event Manager object
              *
              */
+            EventManager();
             ~EventManager();
 
             //-------------------OPERATORS-------------------//
@@ -214,7 +214,6 @@ namespace Engine::Event {
             template<EventConcept Event>
             EventHandler<Event> &getHandler()
             {
-                std::lock_guard<std::mutex> lock(_mutex);
                 auto eventTypeIndex = std::type_index(typeid(Event));
 
                 if (_eventsHandler.find(eventTypeIndex) == _eventsHandler.cend()) {
