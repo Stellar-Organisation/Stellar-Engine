@@ -34,9 +34,6 @@ jobs:
           xmake-version: latest
           actions-cache-folder: '.xmake-cache'
 
-      - name: Setup Git for Windows' minimal SDK
-        uses: git-for-windows/setup-git-for-windows-sdk@v1
-
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         if: ${{ matrix.os != 'macos-latest' }}
@@ -57,7 +54,6 @@ jobs:
 
       - name: Configure Xmake
         run: |
-          xmake update -s dev
           xmake f -m ${{matrix.build_type}} --verbose -y --toolchain=clang --sdk=C:\Users\runneradmin\llvm\bin
 
       - name: Build Xmake
