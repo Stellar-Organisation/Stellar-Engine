@@ -1,5 +1,5 @@
 -- Add the packages required
-add_requires("catch2", "boost", "fmt", "spdlog", {system = true})
+add_requires("catch2", "boost", "fmt", "spdlog", {system = false})
 
 -- Create the Stellar-Engine-Test project
 target("test")
