@@ -3,6 +3,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include "Component.hpp"
 #include "ECS.hpp"
 #include <catch2/catch_test_macros.hpp>
 
@@ -55,6 +56,7 @@ struct hp1 : public Engine::Component
         explicit hp1(int aHp)
             : hp(aHp)
         {}
+
         int hp;
 };
 
@@ -119,6 +121,22 @@ TEST_CASE("World", "[World]")
         auto entity = world.createEntity();
         world.killEntity(entity);
         REQUIRE(entity == world.createEntity());
+    }
+
+    SECTION("Register a component and create an entity")
+    {
+        world.registerComponent<hp1>();
+        auto entity = world.createEntity();
+        auto hp1Comp = world.addComponentToEntity(entity, hp1 {10});
+        REQUIRE(hp1Comp.hp == 10);
+    }
+
+    SECTION("Register a component after having created an entity")
+    {
+        auto entity = world.createEntity();
+        world.registerComponent<hp1>();
+        auto hp1Comp = world.addComponentToEntity(entity, hp1 {10});
+        REQUIRE(hp1Comp.hp == 10);
     }
 
     SECTION("Run a system")

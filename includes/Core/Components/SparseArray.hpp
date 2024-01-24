@@ -5,6 +5,7 @@
 #ifndef SPARSEARRAY_HPP_
 #define SPARSEARRAY_HPP_
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <vector>
@@ -16,6 +17,23 @@ namespace Engine::Core {
     DEFINE_EXCEPTION_FROM(SparseArrayExceptionOutOfRange, SparseArrayException);
     DEFINE_EXCEPTION_FROM(SparseArrayExceptionEmpty, SparseArrayException);
 
+    class ISparseArray
+    {
+        public:
+            ISparseArray() = default;
+            virtual ~ISparseArray() = default;
+
+            ISparseArray(const ISparseArray &other) = default;
+            ISparseArray &operator=(const ISparseArray &other) = default;
+
+            ISparseArray(ISparseArray &&other) noexcept = default;
+            ISparseArray &operator=(ISparseArray &&other) noexcept = default;
+
+            virtual void init(std::size_t aIndex) = 0;
+            virtual void erase(std::size_t aIndex) = 0;
+            virtual void clear() = 0;
+    };
+
     /**
      * @brief SparseArray is a class that store a vector of optional of a given type
      * It represents a ONE component type, each index in the array represent the component of the entity at the same
@@ -24,7 +42,7 @@ namespace Engine::Core {
      * @tparam Component The type of the components to store
      */
     template<ComponentConcept Component>
-    class SparseArray final
+    class SparseArray final : public ISparseArray
     {
         public:
             using compRef = Component &;
@@ -42,7 +60,7 @@ namespace Engine::Core {
         public:
 #pragma region constructors / destructors
             SparseArray() = default;
-            ~SparseArray() = default;
+            ~SparseArray() override = default;
 
             SparseArray(const SparseArray &other) = default;
             SparseArray &operator=(const SparseArray &other) = default;
@@ -145,7 +163,7 @@ namespace Engine::Core {
              * std::nullopt
              * @param index The index to set
              */
-            void init(vectIndex aIndex)
+            void init(vectIndex aIndex) override
             {
                 if (aIndex >= _array.size()) {
                     _array.resize(aIndex + 1, std::nullopt);
@@ -176,7 +194,7 @@ namespace Engine::Core {
              * @throw SparseArrayExceptionOutOfRange if the index is out of range
              * @param index The index to erase
              */
-            void erase(vectIndex aIndex)
+            void erase(vectIndex aIndex) override
             {
                 if (aIndex >= _array.size() || aIndex < 0) {
                     throw SparseArrayExceptionOutOfRange("index out of range: " + std::to_string(aIndex));
@@ -187,7 +205,7 @@ namespace Engine::Core {
             /**
              * @brief Destroy all the components
              */
-            void clear()
+            void clear() override
             {
                 _array.clear();
             }
