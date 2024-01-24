@@ -1,4 +1,4 @@
-name: ci
+name: ci_windows
 on:
   pull_request:
     branches:
@@ -17,10 +17,7 @@ jobs:
 
       matrix:
         os:
-          - ubuntu-latest
-          - macos-latest
-        compiler:
-          - llvm
+          - windows-latest
         generator:
           - "Ninja"
         build_type:
@@ -35,6 +32,16 @@ jobs:
           xmake-version: latest
           actions-cache-folder: '.xmake-cache'
 
+      - name: Setup Cpp
+        uses: aminya/setup-cpp@v1
+        if: ${{ matrix.os != 'macos-latest' }}
+        with:
+          cmake: true
+          make: true
+          ccache: true
+          clangtidy: ${{ env.CLANG_TIDY_VERSION }}
+          cppcheck: true
+
       - name: Setup Cache
         uses: ./.github/actions/setup_cache
         with:
@@ -42,35 +49,12 @@ jobs:
           build_type: ${{ matrix.build_type }}
           generator: ${{ matrix.generator }}
 
-      - name: Setup Cpp
-        uses: aminya/setup-cpp@v1
-        if: ${{ matrix.os != 'macos-latest' }}
-        with:
-          compiler: ${{ matrix.compiler }}
-          make: true
-          ccache: true
-          clangtidy: ${{ env.CLANG_TIDY_VERSION }}
-          cppcheck: true
-
-      - name: Setup Cpp
-        uses: aminya/setup-cpp@v1
-        if: ${{ matrix.os == 'macos-latest' }}
-        with:
-          compiler: ${{ matrix.compiler }}
-          cmake: true
-          make: true
-          ccache: true
-          clangtidy: 15.0.0
-          cppcheck: true
-
       - name: Configure Xmake
         run: |
-          xmake f -m ${{matrix.build_type}} --verbose -y
-
+          xmake f -m ${{matrix.build_type}} --verbose -y -p windows
       - name: Build Xmake
         run: |
           xmake -v -j 4
-
       - name: Unix - Test and coverage
         working-directory: ./build
         run: |

@@ -10,6 +10,7 @@ patat*
 log.txt
 *gcno
 tests
+compile_commands.json
 
 # User spesific settings
 CMakeUserPresets.json
@@ -40,3 +41,8 @@ $RECYCLE.BIN/
 .TemporaryItems
 ehthumbs.db
 Thumbs.db
+.xmake
+bin
+
+/documentation
+doxyfile
