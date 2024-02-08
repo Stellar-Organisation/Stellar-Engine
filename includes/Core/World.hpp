@@ -4,31 +4,31 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
-#include <tuple>
 #include <typeindex>
 #include <utility>
 #include <vector>
 #include "Components/SparseArray.hpp"
-#include "Core/Components/Component.hpp"
 #include "Exception.hpp"
 #include "Systems/System.hpp"
 #include <boost/container/flat_map.hpp>
 
 namespace Engine::Core {
+    //------------------- EXCEPTIONS -------------------//
     DEFINE_EXCEPTION(WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionComponentAlreadyRegistered, WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionComponentNotRegistered, WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionSystemAlreadyRegistered, WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionSystemNotRegistered, WorldException);
 
+    //------------------- WORLD CLASS -------------------//
     /**
-     * @brief The world class represents a level, a scene
-     * @details it contains the entities, components and systems used in the scene
-     *
+     * @brief The world class represent a scene in the game, it store all the entities, the components and the systems
+     * It also provide a way to query the entities and run the systems
      */
     class World
     {
         public:
+            //------------------- WORLD ALIAS -------------------//
             using id = std::size_t;
             using container = std::unique_ptr<ISparseArray>;
             using containerMap = boost::container::flat_map<std::type_index, container>;
@@ -38,305 +38,240 @@ namespace Engine::Core {
             using systems = boost::container::flat_map<std::string, systemFunc>;
 
         protected:
+            //------------------- WORLD ATTRIBUTES -------------------//
             containerMap _components;
             idsContainer _ids;
             id _nextId = 0;
             systems _systems;
 
+            //------------------- QUERY CLASS -------------------//
+            /**
+             * @brief The Query class is a class that allow to query the entities or the components of the world
+             *
+             * @tparam Components The differnent components to query, must inherit from Component
+             */
             template<ComponentConcept... Components>
             class Query
             {
                 private:
+                    //------------------- QUERY ATTRIBUTES -------------------//
                     std::reference_wrapper<Core::World> _world;
 
                 public:
-                    explicit Query(Core::World &world)
-                        : _world(world)
-                    {}
+                    //------------------- QUERY CONSTRUCTOR -------------------//
+                    /**
+                     * @brief Construct a new Query object
+                     *
+                     * @param world The world to query
+                     */
+                    explicit Query(Core::World &world);
 
+                    //------------------- QUERY METHODS -------------------//
+                    /**
+                     * @brief Call a function for each entity that has all the components
+                     *
+                     * @param deltaTime The time between each frame
+                     * @param func The function to call for each entity, must take the world, the deltaTime, the index
+                     * of the entity and the components as parameters and return
+                     */
                     void
                     forEach(double deltaTime,
-                            std::function<void(World &world, double deltaTime, std::size_t idx, Components &...)> func)
-                    {
-                        for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
-                            if (_world.get().template hasComponents<Components...>(idx)) {
-                                func(_world.get(), deltaTime, idx,
-                                     _world.get().template getComponent<Components>().get(idx)...);
-                            }
-                        }
-                    }
+                            std::function<void(World &world, double deltaTime, std::size_t idx, Components &...)> func);
 
-                    auto getAllEntities()
-                    {
-                        std::vector<std::size_t> entities;
+                    /**
+                     * @brief Get all the entities that have all the components in the query
+                     *
+                     * @return auto A vector of the entities that have all the components
+                     */
+                    auto getAllEntities();
 
-                        for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
-                            if (_world.get().template hasComponents<Components...>(idx)) {
-                                entities.emplace_back(idx);
-                            }
-                        }
-                        return entities;
-                    }
+                    /**
+                     * @brief Get all the entities and their components that follow the query
+                     *
+                     * @return auto A vector of tuple of the entities that have all the components and their components
+                     */
+                    auto getAll();
 
-                    auto getAll()
-                    {
-                        std::vector<std::tuple<std::size_t, Components &...>> entities;
-
-                        for (std::size_t idx = 0; idx < _world.get().getCurrentId(); idx++) {
-                            if (_world.get().template hasComponents<Components...>(idx)) {
-                                entities.emplace_back(idx,
-                                                      _world.get().template getComponent<Components>().get(idx)...);
-                            }
-                        }
-                        return entities;
-                    }
-
-                    auto getComponentsOfEntity(std::size_t idx)
-                    {
-                        return std::make_tuple(_world.get().template getComponent<Components>().get(idx)...);
-                    }
+                    /**
+                     * @brief Get the Components Of Entity object
+                     *
+                     * @param idx The index of the entity
+                     * @return auto A tuple of the components of the entity
+                     */
+                    auto getComponentsOfEntity(std::size_t idx);
             };
 
         public:
-#pragma region constructors / destructors
+            //------------------- WORLD CONSTRUCTOR - DESTRUCTOR -------------------//
+            /**
+             * @brief Construct a new World object
+             */
             World() = default;
+            /**
+             * @brief Destroy the World object
+             */
             ~World() = default;
 
+            //------------------- WORLD COPY - MOVE CONSTRUCTOR / OPERATOR -------------------//
             World(const World &other) = default;
             World &operator=(const World &other) = default;
 
             World(World &&other) noexcept = default;
             World &operator=(World &&other) noexcept = default;
-#pragma endregion constructors / destructors
 
-#pragma region methods
-
-            template<ComponentConcept... Components>
-            Query<Components...> query()
-            {
-                return Query<Components...>(*this);
-            }
-
+            //------------------- WORLD METHODS - QUERY -------------------//
             /**
-             * @brief Add a component to the World, all components should be added before any entity is created
+             * @brief Create a query object
              *
-             * @tparam Component Type of the component
-             * @return SparseArray<Component>& Reference to the component SparseArray
-             */
-            template<ComponentConcept Component>
-            SparseArray<Component> &registerComponent()
-            {
-                auto typeIndex = std::type_index(typeid(Component));
-
-                if (_components.find(typeIndex) != _components.end()) {
-                    throw WorldExceptionComponentAlreadyRegistered("Component already registered");
-                }
-                _components[typeIndex] = std::make_unique<SparseArray<Component>>();
-
-                for (std::size_t idx = 0; idx < _nextId; idx++) {
-                    _components[typeIndex]->init(idx);
-                }
-
-                return static_cast<SparseArray<Component> &>(*_components[typeIndex]);
-            }
-
-            /**
-             * @brief Add multiple components to the World
-             *
-             * @tparam Components The components to add
+             * @tparam Components The components to query
+             * @return Query<Components...> The query object
              */
             template<ComponentConcept... Components>
-            void registerComponents()
-            {
-                (registerComponent<Components>(), ...);
-            }
+            Query<Components...> query();
 
+            //------------------- WORLD METHODS - COMPONENTS -------------------//
             /**
-             * @brief Get the Component object
+             * @brief Register a component to the world, it means the entities will be able to have this component
              *
-             * @tparam Component The type of the component
-             * @return SparseArray<Component>& the SparseArray of the component
+             * @tparam Component The component to register to the world, must inherit from Component
+             * @throw WorldExceptionComponentAlreadyRegistered If the component is already registered
+             * @return SparseArray<Component> & The SparseArray of the component registered
              */
             template<ComponentConcept Component>
-            SparseArray<Component> &getComponent()
-            {
-                auto typeIndex = std::type_index(typeid(Component));
-
-                if (_components.find(typeIndex) == _components.end()) {
-                    throw WorldExceptionComponentNotRegistered("Component not registered");
-                }
-                return static_cast<SparseArray<Component> &>(*_components[typeIndex]);
-            }
+            SparseArray<Component> &registerComponent();
 
             /**
-             * @brief Get the Component object
+             * @brief Register multiple components to the world
              *
-             * @tparam Component The type of the component
-             * @return SparseArray<Component>& the SparseArray of the component
+             * @tparam Components The components to register to the world, must inherit from Component
+             */
+            template<ComponentConcept... Components>
+            void registerComponents();
+
+            /**
+             * @brief Get the component of the given type
+             *
+             * @tparam Component The type of the component to get, must inherit from Component
+             * @throw WorldExceptionComponentAlreadyRegistered If the component is already registered
+             * @return SparseArray<Component> & The SparseArray of the component
              */
             template<ComponentConcept Component>
-            SparseArray<Component> const &getComponent() const
-            {
-                auto typeIndex = std::type_index(typeid(Component));
+            SparseArray<Component> &getComponent();
 
-                if (_components.find(typeIndex) == _components.end()) {
-                    throw WorldExceptionComponentNotRegistered("Component not registered");
-                }
-                return static_cast<SparseArray<Component> const &>(*_components.at(typeIndex));
-            }
+            /**
+             * @brief Get the component of the given type
+             *
+             * @tparam Component The type of the component to get, must inherit from Component
+             * @throw WorldExceptionComponentAlreadyRegistered If the component is already registered
+             * @return SparseArray<Component> const & The SparseArray of the component
+             */
+            template<ComponentConcept Component>
+            SparseArray<Component> const &getComponent() const;
 
             /**
              * @brief Check if the entity has all the components
              *
-             * @tparam Components The components to check
-             * @param aIndex The index of the entity
-             * @return true if the entity has all the components
-             * @return false if the entity doesn't have all the components
+             * @tparam Components The components to check, must inherit from Component
+             * @param aIndex The index of the entity to check
+             * @return bool True if the entity has all the components, false otherwise
              */
             template<ComponentConcept... Components>
-            [[nodiscard]] bool hasComponents(std::size_t aIndex) const
-            {
-                return (... && getComponent<Components>().has(aIndex));
-            }
+            [[nodiscard]] bool hasComponents(std::size_t aIndex) const;
 
             /**
-             * @brief Remove a component
+             * @brief Remove a component from the world
              *
-             * @tparam Component The type of the component
+             * @tparam Component The component to remove, must inherit from Component
+             * @throw WorldExceptionComponentAlreadyRegistered If the component is already registered
              */
             template<ComponentConcept Component>
-            void removeComponent()
-            {
-                auto typeIndex = std::type_index(typeid(Component));
-
-                if (_components.find(typeIndex) == _components.end()) {
-                    throw WorldExceptionComponentNotRegistered("Component not registered");
-                }
-                _components.erase(typeIndex);
-            }
+            void removeComponent();
 
             /**
              * @brief Add a component to an entity
              *
-             * @tparam Component The type of the component to add
-             * @param aIndex The index of the entity
-             * @param aComponent The component to add
-             * @return Component& The component added
+             * @tparam Component The type of the component to add, must inherit from Component (should be inferred)
+             * @param aIndex The entity to add the component to
+             * @param aComponent The component to add to the entity
+             * @throw WorldExceptionComponentNotRegistered If the component is not registered
+             * @return Component & The component added to the entity
              */
             template<ComponentConcept Component>
-            Component &addComponentToEntity(std::size_t aIndex, Component &&aComponent)
-            {
-                try {
-                    auto &component = getComponent<Component>();
-
-                    component.set(aIndex, std::forward<Component>(aComponent));
-                    return component.get(aIndex);
-                } catch (WorldExceptionComponentNotRegistered &e) {
-                    throw WorldExceptionComponentNotRegistered("Component not registered");
-                }
-            }
+            Component &addComponentToEntity(std::size_t aIndex, Component &&aComponent);
 
             /**
-             * @brief Build and add a component to an entity
+             * @brief Emplace a component to an entity
              *
-             * @tparam Component The type of the component to add
-             * @tparam Args The types of the arguments to pass to the component constructor (infered)
-             * @param aIndex The index of the entity
-             * @param aArgs The arguments to pass to the component constructor
-             * @return Component& The component added
+             * @tparam Component The type of the component to add, must inherit from Component (should be inferred)
+             * @param aIndex The entity to add the component to
+             * @param aArgs The arguments to construct the component
+             * @throw WorldExceptionComponentNotRegistered If the component is not registered
+             * @return Component & The component added to the entity
              */
             template<ComponentConcept Component, typename... Args>
-            Component &emplaceComponentToEntity(std::size_t aIndex, Args &&...aArgs)
-            {
-                try {
-                    auto &component = getComponent<Component>();
-
-                    component.emplace(aIndex, std::forward<Args>(aArgs)...);
-                    return component.get(aIndex);
-                } catch (WorldExceptionComponentNotRegistered &e) {
-                    throw WorldExceptionComponentNotRegistered("Component not registered");
-                }
-            }
+            Component &emplaceComponentToEntity(std::size_t aIndex, Args &&...aArgs);
 
             /**
              * @brief Remove a component from an entity
              *
-             * @tparam Component The type of the component to remove
-             * @param aIndex The index of the entity
+             * @tparam Component The type of the component to remove, must inherit from Component
+             * @param aIndex The entity to remove the component from
              */
             template<ComponentConcept Component>
-            void removeComponentFromEntity(std::size_t aIndex)
-            {
-                try {
-                    auto &component = getComponent<Component>();
+            void removeComponentFromEntity(std::size_t aIndex);
 
-                    component.erase(aIndex);
-                } catch (WorldExceptionComponentNotRegistered &e) {
-                    throw WorldExceptionComponentNotRegistered("Component not registered");
-                }
-            }
-
+            //------------------- WORLD METHODS - ENTITIES -------------------//
             /**
              * @brief Kill an entity
-             * @details Call erase from each component on the entity, then add the id as a free id
+             * @details The id of the entity will be reusable, the components of the entity will be reinitialized
              * @param aIndex The index of the entity to kill
              */
             void killEntity(std::size_t aIndex);
 
             /**
              * @brief Create an entity
-             * @details Get the next free id, call init from each component on the entity, then return the id
-             * @return std::size_t The id of the entity
+             * @details The id of the entity will be unique, the components of the entity will be initialized
+             * @return std::size_t The index of the entity created
              */
             std::size_t createEntity();
 
             /**
+             * @brief Get the next entity id
+             * @details The next entity id is the id that will be given to the next entity created by the world
+             * @return std::size_t The current entity id
+             */
+            [[nodiscard]] std::size_t getNextEntityId() const;
+
+            //------------------- WORLD METHODS - SYSTEMS -------------------//
+            /**
              * @brief Add a system to the world
              *
-             * @tparam Components The components the system will use
-             * @tparam Function The type of the system (infered)
-             * @param aFunction The system to add
+             * @param aSystem The system to add to the world
+             * @throw WorldExceptionSystemAlreadyRegistered If the system is already registered
              */
-            void addSystem(newSystemFunc &aSystem)
-            {
-                if (_systems.find(aSystem.first) != _systems.end()) {
-                    throw WorldExceptionSystemAlreadyRegistered("System already registered");
-                }
-
-                _systems[aSystem.first] = std::move(aSystem.second);
-            }
+            void addSystem(newSystemFunc &aSystem);
 
             /**
              * @brief Remove a system from the world
              *
-             * @tparam Function The type of the system (infered)
-             * @param aFunction The system to remove
+             * @param aFuncName The name of the system to remove
+             * @throw WorldExceptionSystemNotRegistered If the system is not registered
              */
-            void removeSystem(std::string &aFuncName)
-            {
-                if (_systems.find(aFuncName) == _systems.end()) {
-                    throw WorldExceptionSystemNotRegistered("System not registered");
-                }
-
-                _systems.erase(aFuncName);
-            }
+            void removeSystem(std::string &aFuncName);
 
             /**
-             * @brief Run all the systems once
-             *
+             * @brief Run all the systems of the world
              */
             void runSystems();
-
-            /**
-             * @brief Get the Current Id object
-             *
-             * @return std::size_t The current id
-             */
-            [[nodiscard]] std::size_t getCurrentId() const;
-
-        protected:
-#pragma endregion methods
     };
 } // namespace Engine::Core
+
+#ifndef WORLD_QUERY_HPP_
+    #include "World+Query.hpp"
+#endif // !
+
+#ifndef WORLD_COMPONENTS_HPP_
+    #include "World+Components.hpp"
+#endif // !
 
 #endif /* !WORLD_HPP_ */

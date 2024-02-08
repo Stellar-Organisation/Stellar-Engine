@@ -1,7 +1,7 @@
-#include "World.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <spdlog/spdlog.h>
+#include "World.hpp"
 
 namespace Engine::Core {
     std::size_t World::createEntity()
@@ -34,14 +34,7 @@ namespace Engine::Core {
         }
     }
 
-    void World::runSystems()
-    {
-        for (auto &system : _systems) {
-            system.second->update();
-        }
-    }
-
-    std::size_t World::getCurrentId() const
+    std::size_t World::getNextEntityId() const
     {
         return _nextId;
     }
