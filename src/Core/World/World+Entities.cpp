@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <spdlog/spdlog.h>
-#include "World.hpp"
+#include "World/World.hpp"
 
 namespace Engine::Core {
     std::size_t World::createEntity()

@@ -4,7 +4,7 @@
 #include <memory>
 #include "Core/Events/Event.hpp"
 #include "Exception.hpp"
-#include "World.hpp"
+#include "World/World.hpp"
 #include <boost/container/flat_map.hpp>
 
 namespace Engine {

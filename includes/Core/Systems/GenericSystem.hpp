@@ -4,7 +4,7 @@
 #include <functional>
 #include <utility>
 #include "Core/Components/Component.hpp"
-#include "Core/World.hpp"
+#include "Core/World/World.hpp"
 #include "System.hpp"
 
 namespace Engine::Core {
