@@ -7,7 +7,7 @@
 #include "Core/World/World.hpp"
 #include "System.hpp"
 
-namespace Engine::Core {
+namespace Engine::Systems {
     template<typename Func, ComponentConcept... Components>
     class GenericSystem : public System
     {
@@ -29,12 +29,12 @@ namespace Engine::Core {
     };
 
     template<ComponentConcept... Components, typename Func>
-    std::pair<std::string, std::unique_ptr<System>> createSystem(World &aWorld, const std::string &aName,
+    std::pair<std::string, std::unique_ptr<System>> createSystem(Core::World &aWorld, const std::string &aName,
                                                                  Func aUpdateFunc)
     {
         return std::pair<std::string, std::unique_ptr<System>>(
             std::make_pair(aName, std::make_unique<GenericSystem<Func, Components...>>(aWorld, aUpdateFunc)));
     }
-} // namespace Engine::Core
+} // namespace Engine::Systems
 
 #endif /* !GENERICSYSTEM_HPP_ */

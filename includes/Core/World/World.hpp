@@ -10,10 +10,11 @@
 #include "Components/SparseArray.hpp"
 #include "Exception.hpp"
 #include "Systems/System.hpp"
+#include "Systems/SystemsManager.hpp"
 #include <boost/container/flat_map.hpp>
 
 namespace Engine::Core {
-    //------------------- EXCEPTIONS -------------------//
+    //------------------- WORLD - EXCEPTIONS -------------------//
     DEFINE_EXCEPTION(WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionComponentAlreadyRegistered, WorldException);
     DEFINE_EXCEPTION_FROM(WorldExceptionComponentNotRegistered, WorldException);
@@ -29,20 +30,30 @@ namespace Engine::Core {
     {
         public:
             //------------------- WORLD ALIAS -------------------//
-            using id = std::size_t;
+            //------------------- WORLD ALIAS - COMPONENTS -------------------//
             using container = std::unique_ptr<ISparseArray>;
             using containerMap = boost::container::flat_map<std::type_index, container>;
+
+            //------------------- WORLD ALIAS - ENTITIES -------------------//
+            using id = std::size_t;
             using idsContainer = std::vector<id>;
-            using systemFunc = std::unique_ptr<System>;
-            using newSystemFunc = std::pair<std::string, std::unique_ptr<System>>;
-            using systems = boost::container::flat_map<std::string, systemFunc>;
+
+            //------------------- WORLD ALIAS - SYSTEMS -------------------//
+            using SystemPtr = Systems::SystemsManager::SystemPtr;
+            using SystemName = Systems::SystemsManager::SystemName;
+            using SystemPair = Systems::SystemsManager::SystemPair;
 
         protected:
             //------------------- WORLD ATTRIBUTES -------------------//
+            //------------------- WORLD ATTRIBUTES - COMPONENTS -------------------//
             containerMap _components;
+
+            //------------------- WORLD ATTRIBUTES - ENTITIES -------------------//
             idsContainer _ids;
             id _nextId = 0;
-            systems _systems;
+
+            //------------------- WORLD ATTRIBUTES - SYSTEMS -------------------//
+            Systems::SystemsManager _systems;
 
             //------------------- QUERY CLASS -------------------//
             /**
@@ -249,7 +260,16 @@ namespace Engine::Core {
              * @param aSystem The system to add to the world
              * @throw WorldExceptionSystemAlreadyRegistered If the system is already registered
              */
-            void addSystem(newSystemFunc &aSystem);
+            void addSystem(SystemPair &aSystem);
+
+            /**
+             * @brief Add a system to the world
+             *
+             * @param aName The name of the system to add
+             * @param aSystem The system to add to the world
+             * @throw WorldExceptionSystemAlreadyRegistered If the system is already registered
+             */
+            void addSystem(SystemName &aName, SystemPtr &aSystem);
 
             /**
              * @brief Remove a system from the world

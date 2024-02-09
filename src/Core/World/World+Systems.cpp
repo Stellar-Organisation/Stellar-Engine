@@ -1,28 +1,32 @@
+#include <spdlog/spdlog.h>
 #include "World/World.hpp"
 
 namespace Engine::Core {
     void World::runSystems()
     {
-        for (auto &system : _systems) {
-            system.second->update();
+        _systems.runSystems();
+    }
+
+    void World::addSystem(SystemName &aName, SystemPtr &aSystem)
+    {
+        try {
+            _systems.addSystem(aName, aSystem);
+        } catch (const Systems::SystemsManagerException &e) {
+            spdlog::error("Error while adding system: {}", e.what());
         }
     }
 
-    void World::addSystem(newSystemFunc &aSystem)
+    void World::addSystem(SystemPair &aSystem)
     {
-        if (_systems.find(aSystem.first) != _systems.end()) {
-            throw WorldExceptionSystemAlreadyRegistered("System already registered");
-        }
-
-        _systems[aSystem.first] = std::move(aSystem.second);
+        addSystem(aSystem.first, aSystem.second);
     }
 
     void World::removeSystem(std::string &aFuncName)
     {
-        if (_systems.find(aFuncName) == _systems.end()) {
-            throw WorldExceptionSystemNotRegistered("System not registered");
+        try {
+            _systems.removeSystem(aFuncName);
+        } catch (const Systems::SystemsManagerException &e) {
+            spdlog::error("Error while removing system: {}", e.what());
         }
-
-        _systems.erase(aFuncName);
     }
 } // namespace Engine::Core

@@ -27,11 +27,11 @@ struct hp2 : public Engine::Component
 };
 
 template<typename... Components>
-class MySystemClass : public Engine::Core::System
+class MySystemClass : public Engine::Systems::System
 {
     public:
         explicit MySystemClass(Engine::Core::World &world)
-            : Engine::Core::System(world)
+            : Engine::Systems::System(world)
         {}
 
         MySystemClass(const MySystemClass &) = default;
@@ -109,7 +109,7 @@ TEST_CASE("World", "[World]")
     SECTION("Run a system")
     {
         constexpr int hps = 10;
-        auto MySystem = Engine::Core::createSystem<hp1, hp2>(
+        auto MySystem = Engine::Systems::createSystem<hp1, hp2>(
             world, "MySystem",
             [](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &cop1, hp2 &cop2) {
                 cop1.hp--;
@@ -134,7 +134,7 @@ TEST_CASE("World", "[World]")
         REQUIRE(hp1Comp2.hp == hps - 1);
         REQUIRE(hp2Comp2.maxHp == hps - 2);
         REQUIRE(hp2Comp3.maxHp == hps);
-        auto secondSystem = std::make_pair<std::string, std::unique_ptr<Engine::Core::System>>(
+        auto secondSystem = std::make_pair<std::string, std::unique_ptr<Engine::Systems::System>>(
             "MySystemClass", std::make_unique<MySystemClass<hp1, hp2>>(world));
         world.addSystem(secondSystem);
         world.runSystems();
