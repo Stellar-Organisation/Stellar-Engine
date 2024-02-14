@@ -1,8 +1,12 @@
 set_project("Stellar-Engine")
 
-add_toolchains("llvm")
-set_languages("cxx20")
+if is_plat("windows") then
+    add_toolchains("msvc")
+else
+    add_toolchains("clang")
+end
 
+set_languages("cxx23")
 add_rules("mode.debug", "mode.release")
 
 includes("src")
