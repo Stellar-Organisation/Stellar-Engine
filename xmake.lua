@@ -6,7 +6,7 @@ else
     add_toolchains("clang")
 end
 
-set_languages("cxx20")
+set_languages("cxx23")
 add_rules("mode.debug", "mode.release")
 
 includes("src")
