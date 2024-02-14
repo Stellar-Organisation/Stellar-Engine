@@ -1,7 +1,6 @@
 #ifndef WORLD_HPP_
 #define WORLD_HPP_
 
-#include <any>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -119,7 +118,7 @@ namespace Engine::Core {
             }
 
             /**
-             * @brief Add a component to the World
+             * @brief Add a component to the World, all components should be added before any entity is created
              *
              * @tparam Component Type of the component
              * @return SparseArray<Component>& Reference to the component SparseArray

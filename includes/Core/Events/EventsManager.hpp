@@ -1,9 +1,9 @@
 #ifndef EVENTMANAGER_HPP
 #define EVENTMANAGER_HPP
 
-#include <any>
 #include <cstddef>
-#include <functional>
+#include <iostream>
+#include <memory>
 #include <typeindex>
 #include <utility>
 #include <vector>
@@ -23,13 +23,11 @@ namespace Engine::Event {
     class EventManager final
     {
         public:
-            using func = std::function<void(EventManager &)>;
-            using eventHandler = std::pair<std::any, func>;
+            using eventHandler = std::unique_ptr<IEventHandler>;
 
         private:
-            EventManager();
-
             boost::container::flat_map<std::type_index, eventHandler> _eventsHandler;
+            std::mutex _mutex;
 
         public:
             //------------------- DESTRUCTOR-------------------//
@@ -37,6 +35,7 @@ namespace Engine::Event {
              * @brief Destroy the Event Manager object
              *
              */
+            EventManager();
             ~EventManager();
 
             //-------------------OPERATORS-------------------//
@@ -87,11 +86,13 @@ namespace Engine::Event {
             template<EventConcept Event>
             void pushEvent(const Event &aEvent)
             {
+                std::lock_guard<std::mutex> lock(_mutex);
+
                 try {
                     auto &handler = getHandler<Event>();
 
                     handler.pushEvent(aEvent);
-                } catch (const std::bad_any_cast &e) {
+                } catch (const EventManagerExceptionNoHandler &e) {
                     throw EventManagerExceptionNoHandler("Can't push event");
                 }
             }
@@ -102,13 +103,15 @@ namespace Engine::Event {
              * @return std::vector<Event>& The list of events.
              */
             template<EventConcept Event>
-            std::vector<Event> &getEventsByType()
+            std::vector<Event> &getEvents()
             {
+                std::lock_guard<std::mutex> lock(_mutex);
+
                 try {
                     auto &handler = getHandler<Event>();
 
                     return handler.getEvents();
-                } catch (const std::bad_any_cast &e) {
+                } catch (const EventManagerExceptionNoHandler &e) {
                     throw EventManagerExceptionNoHandler("Can't get events");
                 }
             }
@@ -120,11 +123,13 @@ namespace Engine::Event {
             template<EventConcept... EventList>
             void keepEventsAndClear()
             {
+                std::lock_guard<std::mutex> lock(_mutex);
                 std::vector<std::type_index> eventIndexList = {std::type_index(typeid(EventList))...};
 
-                for (auto &lbd : _eventsHandler) {
-                    if (std::find(eventIndexList.begin(), eventIndexList.end(), lbd.first) == eventIndexList.end()) {
-                        lbd.second.second(*this);
+                for (auto &handler : _eventsHandler) {
+                    if (std::find(eventIndexList.begin(), eventIndexList.end(), handler.first)
+                        == eventIndexList.end()) {
+                        handler.second->clearEvents();
                     }
                 }
             }
@@ -138,6 +143,7 @@ namespace Engine::Event {
             template<EventConcept Event>
             void removeEvent(const std::size_t aIndex)
             {
+                std::lock_guard<std::mutex> lock(_mutex);
                 auto eventIndex = std::type_index(typeid(Event));
 
                 if (_eventsHandler.find(eventIndex) == _eventsHandler.end()) {
@@ -147,7 +153,7 @@ namespace Engine::Event {
                     auto &handler = getHandler<Event>();
 
                     handler.removeEvent(aIndex);
-                } catch (const std::bad_any_cast &e) {
+                } catch (const EventManagerExceptionNoHandler &e) {
                     throw EventManagerExceptionNoHandler("Can't remove event");
                 }
             }
@@ -161,6 +167,7 @@ namespace Engine::Event {
             template<EventConcept Event>
             void removeEvent(std::vector<size_t> aIndexes)
             {
+                std::lock_guard<std::mutex> lock(_mutex);
                 auto eventIndex = std::type_index(typeid(Event));
 
                 if (_eventsHandler.find(eventIndex) == _eventsHandler.end()) {
@@ -174,7 +181,7 @@ namespace Engine::Event {
 
                         handler.removeEvent(idx);
                     }
-                } catch (const std::bad_any_cast &e) {
+                } catch (const EventManagerExceptionNoHandler &e) {
                     throw EventManagerExceptionNoHandler("Can't remove event");
                 }
             }
@@ -182,16 +189,13 @@ namespace Engine::Event {
             template<EventConcept Event>
             void initEventHandler()
             {
+                std::lock_guard<std::mutex> lock(_mutex);
                 auto eventTypeIndex = std::type_index(typeid(Event));
 
                 if (_eventsHandler.find(eventTypeIndex) != _eventsHandler.end()) {
                     return;
                 }
-                _eventsHandler[eventTypeIndex] = std::make_pair(EventHandler<Event>(), [](EventManager &aEventManager) {
-                    auto &handler = aEventManager.getHandler<Event>();
-
-                    handler.clearEvents();
-                });
+                _eventsHandler[eventTypeIndex] = std::make_unique<EventHandler<Event>>();
             }
 
             template<EventConcept... EventList>
@@ -212,17 +216,13 @@ namespace Engine::Event {
             {
                 auto eventTypeIndex = std::type_index(typeid(Event));
 
-                try {
-                    if (_eventsHandler.find(eventTypeIndex) == _eventsHandler.cend()) {
-                        throw EventManagerExceptionNoHandler("There is no handler of this type");
-                    }
-                    auto &handler = _eventsHandler.at(eventTypeIndex);
-                    auto &component = std::any_cast<EventHandler<Event> &>(handler);
-
-                    return component;
-                } catch (const std::bad_any_cast &e) {
+                if (_eventsHandler.find(eventTypeIndex) == _eventsHandler.cend()) {
                     throw EventManagerExceptionNoHandler("There is no handler of this type");
                 }
+                auto &handler = _eventsHandler.at(eventTypeIndex);
+                auto &component = static_cast<EventHandler<Event> &>(*handler);
+
+                return component;
             }
     };
 } // namespace Engine::Event
