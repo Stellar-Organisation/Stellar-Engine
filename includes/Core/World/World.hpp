@@ -5,7 +5,6 @@
 #include <functional>
 #include <memory>
 #include <typeindex>
-#include <utility>
 #include <vector>
 #include "Components/SparseArray.hpp"
 #include "Exception.hpp"
@@ -26,7 +25,7 @@ namespace Engine::Core {
      * @brief The world class represent a scene in the game, it store all the entities, the components and the systems
      * It also provide a way to query the entities and run the systems
      */
-    class World
+    class World final
     {
         public:
             //------------------- WORLD ALIAS -------------------//

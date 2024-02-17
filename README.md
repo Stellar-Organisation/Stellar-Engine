@@ -1,54 +1,31 @@
-# cmake_template
+# Stellar-Engine
+Stellar Engine is a 2D game engine written in C++ and OpenGL. It is designed to be simple and easy to usTe, while still being powerful and flexible. It is currently in development and is not yet ready for usTe in production.
 
-[![ci](https://github.com/UwUClub/Template-V3/actions/workflows/ci.yml/badge.svg)](https://github.com/UwUClub/Template-V3/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/UwUClub/Template-V3/branch/main/graph/badge.svg)](https://codecov.io/gh/UwUClub/Template-V3)
-[![CodeQL](https://github.com/UwUClub/Template-V3/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/UwUClub/Template-V3/actions/workflows/codeql-analysis.yml)
+# Github guide
+## Branch naming
+- `{ticket-number}/feature/{feature-name}`: For new features
+    - Example: `STE-1/feature/physics-engine`
+- `{ticket-number}/fix/{feature-name}/{fix-name}`: For bug fixes
+    - Example: `STE-2/fix/physics-engine/fix-collision-bug`
+- `{ticket-number}/refactor/{feature-name}/{refactor-name}`: For refactoring
+    - Example: `STE-3/refactor/physics-engine/refactor-collision-code`
+- `{ticket-number}/test/{feature-name}/{test-name}`: For writing tests
+    - Example: `STE-4/test/physics-engine/write-collision-tests`
+- `{ticket-number}/docs/{feature-name}/{docs-name}`: For documentation
+    - Example: `STE-5/docs/physics-engine/write-collision-docs`
 
-## About cmake_template
+## Commit messages
+- `{ticket-number}: {message} {optional-description} {MAJOR|MINOR|PATCH}`
+    - Example: `STE-1: Add physics engine MAJOR`
+    - Example: `STE-2: Fix collision bug PATCH`
+    - Example: `STE-3: Refactor collision code MINOR`
+    - Example: `STE-4: Write collision tests MINOR`
+    - Example: `STE-5: Write collision docs MINOR`
 
-This is a C++ Best Practices GitHub template for getting up and running with C++ quickly.
-
-By default (collectively known as `ENABLE_DEVELOPER_MODE`)
-
- * Address Sanitizer and Undefined Behavior Sanitizer enabled where possible
- * Warnings as errors
- * clang-tidy and cppcheck static analysis
- * CPM for dependencies
-
-It includes
-
- * a basic CLI example
- * examples for fuzz, unit, and constexpr testing
- * large github action testing matrix
-
-It requires
-
- * cmake
- * a compiler
-
-
-## Getting Started
-
-### Use the Github template
-First, click the green `Use this template` button near the top of this page.
-This will take you to Github's ['Generate Repository'](https://github.com/cpp-best-practices/cmake_template/generate) page.
-Fill in a repository name and short description, and click 'Create repository from template'.
-This will allow you to create a new repository in your Github account,
-prepopulated with the contents of this project.
-
-After creating the project please wait until the cleanup workflow has finished 
-setting up your project and commited the changes.
-
-Now you can clone the project locally and get to work!
-
-    git clone https://github.com/<user>/<your_new_repo>.git
-
-## More Details
-
- * [Dependency Setup](README_dependencies.md)
- * [Building Details](README_building.md)
- * [Docker](README_docker.md)
-
-## Testing
-
-See [Catch2 tutorial](https://github.com/catchorg/Catch2/blob/master/docs/tutorial.md)
+## Pull requests
+- `{ticket-number}: {short-description}`
+    - Example: `STE-1: Add physics engine`
+    - Example: `STE-2: Fix collision bug`
+    - Example: `STE-3: Refactor collision code`
+    - Example: `STE-4: Write collision tests`
+    - Example: `STE-5: Write collision docs`

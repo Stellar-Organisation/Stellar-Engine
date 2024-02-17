@@ -73,39 +73,27 @@ namespace Engine::Core {
     template<ComponentConcept Component>
     Component &World::addComponentToEntity(std::size_t aIndex, Component &&aComponent)
     {
-        try {
-            auto &component = getComponent<Component>();
+        auto &component = getComponent<Component>();
 
-            component.set(aIndex, std::forward<Component>(aComponent));
-            return component.get(aIndex);
-        } catch (WorldExceptionComponentNotRegistered &e) {
-            throw WorldExceptionComponentNotRegistered("Component not registered");
-        }
+        component.set(aIndex, std::forward<Component>(aComponent));
+        return component.get(aIndex);
     }
 
     template<ComponentConcept Component, typename... Args>
     Component &World::emplaceComponentToEntity(std::size_t aIndex, Args &&...aArgs)
     {
-        try {
-            auto &component = getComponent<Component>();
+        auto &component = getComponent<Component>();
 
-            component.emplace(aIndex, std::forward<Args>(aArgs)...);
-            return component.get(aIndex);
-        } catch (WorldExceptionComponentNotRegistered &e) {
-            throw WorldExceptionComponentNotRegistered("Component not registered");
-        }
+        component.emplace(aIndex, std::forward<Args>(aArgs)...);
+        return component.get(aIndex);
     }
 
     template<ComponentConcept Component>
     void World::removeComponentFromEntity(std::size_t aIndex)
     {
-        try {
-            auto &component = getComponent<Component>();
+        auto &component = getComponent<Component>();
 
-            component.erase(aIndex);
-        } catch (WorldExceptionComponentNotRegistered &e) {
-            throw WorldExceptionComponentNotRegistered("Component not registered");
-        }
+        component.erase(aIndex);
     }
 } // namespace Engine::Core
 
