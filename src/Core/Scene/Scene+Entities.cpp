@@ -9,13 +9,14 @@
 **                                                     |___/                   *
 **                                                                             *
 *
-** File: SparseArraysManager.hpp                                               *
+** File: Scene+Entities.cpp                                                    *
 ** Project: Stellar-Engine                                                     *
-** Created Date: Sa Feb 2024                                                   *
+** Created Date: We Feb 2024                                                   *
 ** Author: GlassAlo                                                            *
 ** Email: ofourpatat@gmail.com                                                 *
 ** -----                                                                       *
-** Description: {Enter a description for the file}                             *
+** Description: This file contains the implementation of the Scene with the    *
+**              entities                                                       *
 ** -----                                                                       *
 ** Last Modified: Thu Feb 22 2024                                              *
 ** Modified By: GlassAlo                                                       *
@@ -27,17 +28,44 @@
 ** ----------	---	---------------------------------------------------------  *
 */
 
-#ifndef SPARSEARRAYSMANAGER_HPP_
-#define SPARSEARRAYSMANAGER_HPP_
+#include <algorithm>
+#include <cstddef>
+#include <spdlog/spdlog.h>
+#include "Scene/Scene.hpp"
 
-class SparseArraysManager
-{
-    public:
-        SparseArraysManager();
-        ~SparseArraysManager();
+namespace Engine::Core {
+    std::size_t Scene::createEntity()
+    {
+        std::size_t newIdx = 0;
 
-    protected:
-    private:
-};
+        if (_ids.empty()) {
+            newIdx = _nextId;
+            _nextId++;
+        } else {
+            const auto smallestIdx = std::min_element(_ids.begin(), _ids.end());
 
-#endif /* !SPARSEARRAYSMANAGER_HPP_ */
+            _ids.erase(smallestIdx);
+            newIdx = *smallestIdx;
+        }
+        spdlog::debug("Creating entity {}", newIdx);
+        for (const auto &component : _components) {
+            component.second->init(newIdx);
+        }
+        return newIdx;
+    }
+
+    void Scene::killEntity(std::size_t aIndex)
+    {
+        spdlog::debug("Killing entity {}", aIndex);
+        _ids.push_back(aIndex);
+
+        for (const auto &component : _components) {
+            component.second->erase(aIndex);
+        }
+    }
+
+    std::size_t Scene::getNextEntityId() const
+    {
+        return _nextId;
+    }
+} // namespace Engine::Core

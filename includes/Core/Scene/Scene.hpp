@@ -1,5 +1,34 @@
-#ifndef WORLD_HPP_
-#define WORLD_HPP_
+/*
+**    _____ _       _ _                   ______             _                 *
+**   / ____| |     | | |                 |  ____|           (_)                *
+**  | (___ | |_ ___| | | __ _ _ __ ______| |__   _ __   __ _ _ _ __   ___      *
+**   \___ \| __/ _ \ | |/ _` | '__|______|  __| | '_ \ / _` | | '_ \ / _ \     *
+**   ____) | ||  __/ | | (_| | |         | |____| | | | (_| | | | | |  __/     *
+**  |_____/ \__\___|_|_|\__,_|_|         |______|_| |_|\__, |_|_| |_|\___|     *
+**                                                      __/ |                  *
+**                                                     |___/                   *
+**                                                                             *
+*
+** File: Scene.hpp                                                             *
+** Project: Stellar-Engine                                                     *
+** Created Date: Sa Feb 2024                                                   *
+** Author: GlassAlo                                                            *
+** Email: ofourpatat@gmail.com                                                 *
+** -----                                                                       *
+** Description: This file contains the definition of Scene                     *
+** -----                                                                       *
+** Last Modified: Thu Feb 22 2024                                              *
+** Modified By: GlassAlo                                                       *
+** -----                                                                       *
+** Copyright (c) 2024 Stellar-Organisation                                     *
+** -----                                                                       *
+** HISTORY:                                                                    *
+** Date      	By	Comments                                                   *
+** ----------	---	---------------------------------------------------------  *
+*/
+
+#ifndef SCENE_HPP_
+#define SCENE_HPP_
 
 #include <cstddef>
 #include <functional>
@@ -8,55 +37,54 @@
 #include <vector>
 #include "Components/SparseArray.hpp"
 #include "Exception.hpp"
-#include "Systems/System.hpp"
 #include "Systems/SystemsManager.hpp"
 #include <boost/container/flat_map.hpp>
 
 namespace Engine::Core {
-    //------------------- WORLD - EXCEPTIONS -------------------//
-    DEFINE_EXCEPTION(WorldException);
-    DEFINE_EXCEPTION_FROM(WorldExceptionComponentAlreadyRegistered, WorldException);
-    DEFINE_EXCEPTION_FROM(WorldExceptionComponentNotRegistered, WorldException);
-    DEFINE_EXCEPTION_FROM(WorldExceptionSystemAlreadyRegistered, WorldException);
-    DEFINE_EXCEPTION_FROM(WorldExceptionSystemNotRegistered, WorldException);
+    //------------------- SCENE - EXCEPTIONS -------------------//
+    DEFINE_EXCEPTION(SceneException);
+    DEFINE_EXCEPTION_FROM(SceneExceptionComponentAlreadyRegistered, SceneException);
+    DEFINE_EXCEPTION_FROM(SceneExceptionComponentNotRegistered, SceneException);
+    DEFINE_EXCEPTION_FROM(SceneExceptionSystemAlreadyRegistered, SceneException);
+    DEFINE_EXCEPTION_FROM(SceneExceptionSystemNotRegistered, SceneException);
 
-    //------------------- WORLD CLASS -------------------//
+    //------------------- SCENE CLASS -------------------//
     /**
-     * @brief The world class represent a scene in the game, it store all the entities, the components and the systems
-     * It also provide a way to query the entities and run the systems
+     * @brief The scene class stores all the entities, the components and the systems
+     * It also provides a way to query the entities and run the systems
      */
-    class World final
+    class Scene final
     {
         public:
-            //------------------- WORLD ALIAS -------------------//
-            //------------------- WORLD ALIAS - COMPONENTS -------------------//
+            //------------------- SCENE ALIAS -------------------//
+            //------------------- SCENE ALIAS - COMPONENTS -------------------//
             using container = std::unique_ptr<ISparseArray>;
             using containerMap = boost::container::flat_map<std::type_index, container>;
 
-            //------------------- WORLD ALIAS - ENTITIES -------------------//
+            //------------------- SCENE ALIAS - ENTITIES -------------------//
             using id = std::size_t;
             using idsContainer = std::vector<id>;
 
-            //------------------- WORLD ALIAS - SYSTEMS -------------------//
+            //------------------- SCENE ALIAS - SYSTEMS -------------------//
             using SystemPtr = Systems::SystemsManager::SystemPtr;
             using SystemName = Systems::SystemsManager::SystemName;
             using SystemPair = Systems::SystemsManager::SystemPair;
 
         protected:
-            //------------------- WORLD ATTRIBUTES -------------------//
-            //------------------- WORLD ATTRIBUTES - COMPONENTS -------------------//
+            //------------------- SCENE ATTRIBUTES -------------------//
+            //------------------- SCENE ATTRIBUTES - COMPONENTS -------------------//
             containerMap _components;
 
-            //------------------- WORLD ATTRIBUTES - ENTITIES -------------------//
+            //------------------- SCENE ATTRIBUTES - ENTITIES -------------------//
             idsContainer _ids;
             id _nextId = 0;
 
-            //------------------- WORLD ATTRIBUTES - SYSTEMS -------------------//
+            //------------------- SCENE ATTRIBUTES - SYSTEMS -------------------//
             Systems::SystemsManager _systems;
 
             //------------------- QUERY CLASS -------------------//
             /**
-             * @brief The Query class is a class that allow to query the entities or the components of the world
+             * @brief The Query class is a class that allow to query the entities or the components of the scene
              *
              * @tparam Components The differnent components to query, must inherit from Component
              */
@@ -65,28 +93,28 @@ namespace Engine::Core {
             {
                 private:
                     //------------------- QUERY ATTRIBUTES -------------------//
-                    std::reference_wrapper<Core::World> _world;
+                    std::reference_wrapper<Core::Scene> _scene;
 
                 public:
                     //------------------- QUERY CONSTRUCTOR -------------------//
                     /**
                      * @brief Construct a new Query object
                      *
-                     * @param world The world to query
+                     * @param aScene The scene to query
                      */
-                    explicit Query(Core::World &world);
+                    explicit Query(Core::Scene &aScene);
 
                     //------------------- QUERY METHODS -------------------//
                     /**
                      * @brief Call a function for each entity that has all the components
                      *
                      * @param deltaTime The time between each frame
-                     * @param func The function to call for each entity, must take the world, the deltaTime, the index
+                     * @param func The function to call for each entity, must take the scene, the deltaTime, the index
                      * of the entity and the components as parameters and return
                      */
-                    void
-                    forEach(double deltaTime,
-                            std::function<void(World &world, double deltaTime, std::size_t idx, Components &...)> func);
+                    void forEach(
+                        double aDeltaTime,
+                        std::function<void(Scene &aScene, double aDeltaTime, std::size_t aIdx, Components &...)> aFunc);
 
                     /**
                      * @brief Get all the entities that have all the components in the query
@@ -108,28 +136,28 @@ namespace Engine::Core {
                      * @param idx The index of the entity
                      * @return auto A tuple of the components of the entity
                      */
-                    auto getComponentsOfEntity(std::size_t idx);
+                    auto getComponentsOfEntity(std::size_t aIdx);
             };
 
         public:
-            //------------------- WORLD CONSTRUCTOR - DESTRUCTOR -------------------//
+            //------------------- SCENE CONSTRUCTOR - DESTRUCTOR -------------------//
             /**
-             * @brief Construct a new World object
+             * @brief Construct a new Scene object
              */
-            World() = default;
+            Scene() = default;
             /**
-             * @brief Destroy the World object
+             * @brief Destroy the Scene object
              */
-            ~World() = default;
+            ~Scene() = default;
 
-            //------------------- WORLD COPY - MOVE CONSTRUCTOR / OPERATOR -------------------//
-            World(const World &other) = default;
-            World &operator=(const World &other) = default;
+            //------------------- SCENE COPY - MOVE CONSTRUCTOR / OPERATOR -------------------//
+            Scene(const Scene &aOther) = default;
+            Scene &operator=(const Scene &aOther) = default;
 
-            World(World &&other) noexcept = default;
-            World &operator=(World &&other) noexcept = default;
+            Scene(Scene &&aOther) noexcept = default;
+            Scene &operator=(Scene &&aOther) noexcept = default;
 
-            //------------------- WORLD METHODS - QUERY -------------------//
+            //------------------- SCENE METHODS - QUERY -------------------//
             /**
              * @brief Create a query object
              *
@@ -139,21 +167,21 @@ namespace Engine::Core {
             template<ComponentConcept... Components>
             Query<Components...> query();
 
-            //------------------- WORLD METHODS - COMPONENTS -------------------//
+            //------------------- SCENE METHODS - COMPONENTS -------------------//
             /**
-             * @brief Register a component to the world, it means the entities will be able to have this component
+             * @brief Register a component to the scene, it means the entities will be able to have this component
              *
-             * @tparam Component The component to register to the world, must inherit from Component
-             * @throw WorldExceptionComponentAlreadyRegistered If the component is already registered
+             * @tparam Component The component to register to the scene, must inherit from Component
+             * @throw SceneExceptionComponentAlreadyRegistered If the component is already registered
              * @return SparseArray<Component> & The SparseArray of the component registered
              */
             template<ComponentConcept Component>
             SparseArray<Component> &registerComponent();
 
             /**
-             * @brief Register multiple components to the world
+             * @brief Register multiple components to the scene
              *
-             * @tparam Components The components to register to the world, must inherit from Component
+             * @tparam Components The components to register to the scene, must inherit from Component
              */
             template<ComponentConcept... Components>
             void registerComponents();
@@ -162,7 +190,7 @@ namespace Engine::Core {
              * @brief Get the component of the given type
              *
              * @tparam Component The type of the component to get, must inherit from Component
-             * @throw WorldExceptionComponentAlreadyRegistered If the component is already registered
+             * @throw SceneExceptionComponentAlreadyRegistered If the component is already registered
              * @return SparseArray<Component> & The SparseArray of the component
              */
             template<ComponentConcept Component>
@@ -172,7 +200,7 @@ namespace Engine::Core {
              * @brief Get the component of the given type
              *
              * @tparam Component The type of the component to get, must inherit from Component
-             * @throw WorldExceptionComponentAlreadyRegistered If the component is already registered
+             * @throw SceneExceptionComponentAlreadyRegistered If the component is already registered
              * @return SparseArray<Component> const & The SparseArray of the component
              */
             template<ComponentConcept Component>
@@ -189,10 +217,10 @@ namespace Engine::Core {
             [[nodiscard]] bool hasComponents(std::size_t aIndex) const;
 
             /**
-             * @brief Remove a component from the world
+             * @brief Remove a component from the scene
              *
              * @tparam Component The component to remove, must inherit from Component
-             * @throw WorldExceptionComponentAlreadyRegistered If the component is already registered
+             * @throw SceneExceptionComponentAlreadyRegistered If the component is already registered
              */
             template<ComponentConcept Component>
             void removeComponent();
@@ -203,7 +231,7 @@ namespace Engine::Core {
              * @tparam Component The type of the component to add, must inherit from Component (should be inferred)
              * @param aIndex The entity to add the component to
              * @param aComponent The component to add to the entity
-             * @throw WorldExceptionComponentNotRegistered If the component is not registered
+             * @throw SceneExceptionComponentNotRegistered If the component is not registered
              * @return Component & The component added to the entity
              */
             template<ComponentConcept Component>
@@ -215,7 +243,7 @@ namespace Engine::Core {
              * @tparam Component The type of the component to add, must inherit from Component (should be inferred)
              * @param aIndex The entity to add the component to
              * @param aArgs The arguments to construct the component
-             * @throw WorldExceptionComponentNotRegistered If the component is not registered
+             * @throw SceneExceptionComponentNotRegistered If the component is not registered
              * @return Component & The component added to the entity
              */
             template<ComponentConcept Component, typename... Args>
@@ -230,7 +258,7 @@ namespace Engine::Core {
             template<ComponentConcept Component>
             void removeComponentFromEntity(std::size_t aIndex);
 
-            //------------------- WORLD METHODS - ENTITIES -------------------//
+            //------------------- Scene METHODS - ENTITIES -------------------//
             /**
              * @brief Kill an entity
              * @details The id of the entity will be reusable, the components of the entity will be reinitialized
@@ -247,50 +275,50 @@ namespace Engine::Core {
 
             /**
              * @brief Get the next entity id
-             * @details The next entity id is the id that will be given to the next entity created by the world
+             * @details The next entity id is the id that will be given to the next entity created by the scene
              * @return std::size_t The current entity id
              */
             [[nodiscard]] std::size_t getNextEntityId() const;
 
-            //------------------- WORLD METHODS - SYSTEMS -------------------//
+            //------------------- SCENE METHODS - SYSTEMS -------------------//
             /**
-             * @brief Add a system to the world
+             * @brief Add a system to the scene
              *
-             * @param aSystem The system to add to the world
-             * @throw WorldExceptionSystemAlreadyRegistered If the system is already registered
+             * @param aSystem The system to add to the scene
+             * @throw SceneExceptionSystemAlreadyRegistered If the system is already registered
              */
             void addSystem(SystemPair &aSystem);
 
             /**
-             * @brief Add a system to the world
+             * @brief Add a system to the scene
              *
              * @param aName The name of the system to add
-             * @param aSystem The system to add to the world
-             * @throw WorldExceptionSystemAlreadyRegistered If the system is already registered
+             * @param aSystem The system to add to the scene
+             * @throw SceneExceptionSystemAlreadyRegistered If the system is already registered
              */
             void addSystem(SystemName &aName, SystemPtr &aSystem);
 
             /**
-             * @brief Remove a system from the world
+             * @brief Remove a system from the scene
              *
              * @param aFuncName The name of the system to remove
-             * @throw WorldExceptionSystemNotRegistered If the system is not registered
+             * @throw SceneExceptionSystemNotRegistered If the system is not registered
              */
             void removeSystem(std::string &aFuncName);
 
             /**
-             * @brief Run all the systems of the world
+             * @brief Run all the systems of the scene
              */
             void runSystems();
     };
 } // namespace Engine::Core
 
-#ifndef WORLD_QUERY_HPP_
-    #include "World+Query.hpp"
+#ifndef SCENE_QUERY_HPP_
+    #include "Scene+Query.hpp"
 #endif // !
 
-#ifndef WORLD_COMPONENTS_HPP_
-    #include "World+Components.hpp"
+#ifndef SCENE_COMPONENTS_HPP_
+    #include "Scene+Components.hpp"
 #endif // !
 
-#endif /* !WORLD_HPP_ */
+#endif /* !SCENE_HPP_ */
