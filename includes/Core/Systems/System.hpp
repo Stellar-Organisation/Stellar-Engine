@@ -1,10 +1,39 @@
+/*
+**    _____ _       _ _                   ______             _                 *
+**   / ____| |     | | |                 |  ____|           (_)                *
+**  | (___ | |_ ___| | | __ _ _ __ ______| |__   _ __   __ _ _ _ __   ___      *
+**   \___ \| __/ _ \ | |/ _` | '__|______|  __| | '_ \ / _` | | '_ \ / _ \     *
+**   ____) | ||  __/ | | (_| | |         | |____| | | | (_| | | | | |  __/     *
+**  |_____/ \__\___|_|_|\__,_|_|         |______|_| |_|\__, |_|_| |_|\___|     *
+**                                                      __/ |                  *
+**                                                     |___/                   *
+**                                                                             *
+*
+** File: System.hpp                                                            *
+** Project: Stellar-Engine                                                     *
+** Created Date: We Feb 2024                                                   *
+** Author: GlassAlo                                                            *
+** Email: ofourpatat@gmail.com                                                 *
+** -----                                                                       *
+** Description: {Enter a description for the file}                             *
+** -----                                                                       *
+** Last Modified: Thu Feb 22 2024                                              *
+** Modified By: GlassAlo                                                       *
+** -----                                                                       *
+** Copyright (c) 2024 Stellar-Organisation                                     *
+** -----                                                                       *
+** HISTORY:                                                                    *
+** Date      	By	Comments                                                   *
+** ----------	---	---------------------------------------------------------  *
+*/
+
 #ifndef SYSTEM_HPP_
 #define SYSTEM_HPP_
 #include <functional>
 #include "Core/Clock.hpp"
 
 namespace Engine::Core {
-    class World;
+    class Scene;
 }
 
 namespace Engine::Systems {
@@ -22,7 +51,7 @@ namespace Engine::Systems {
 
         protected:
             //------------------- SYSTEM ATTRIBUTES -------------------//
-            std::reference_wrapper<Core::World> _world;
+            std::reference_wrapper<Core::Scene> _world;
             Clock _clock;
 
         public:
@@ -31,7 +60,7 @@ namespace Engine::Systems {
              * @brief Construct a new System object
              * @param aWorld A reference to the world in which the system is going to be used.
              */
-            explicit System(Core::World &aWorld)
+            explicit System(Core::Scene &aWorld)
                 : _world(aWorld)
             {}
             /**

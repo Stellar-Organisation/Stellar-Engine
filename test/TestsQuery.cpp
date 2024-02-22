@@ -1,3 +1,32 @@
+/*
+**    _____ _       _ _                   ______             _                 *
+**   / ____| |     | | |                 |  ____|           (_)                *
+**  | (___ | |_ ___| | | __ _ _ __ ______| |__   _ __   __ _ _ _ __   ___      *
+**   \___ \| __/ _ \ | |/ _` | '__|______|  __| | '_ \ / _` | | '_ \ / _ \     *
+**   ____) | ||  __/ | | (_| | |         | |____| | | | (_| | | | | |  __/     *
+**  |_____/ \__\___|_|_|\__,_|_|         |______|_| |_|\__, |_|_| |_|\___|     *
+**                                                      __/ |                  *
+**                                                     |___/                   *
+**                                                                             *
+*
+** File: TestsQuery.cpp                                                        *
+** Project: Stellar-Engine                                                     *
+** Created Date: We Feb 2024                                                   *
+** Author: GlassAlo                                                            *
+** Email: ofourpatat@gmail.com                                                 *
+** -----                                                                       *
+** Description: {Enter a description for the file}                             *
+** -----                                                                       *
+** Last Modified: Thu Feb 22 2024                                              *
+** Modified By: GlassAlo                                                       *
+** -----                                                                       *
+** Copyright (c) 2024 Stellar-Organisation                                     *
+** -----                                                                       *
+** HISTORY:                                                                    *
+** Date      	By	Comments                                                   *
+** ----------	---	---------------------------------------------------------  *
+*/
+
 #include <cstddef>
 #include <cstdio>
 #include <functional>
@@ -28,7 +57,7 @@ struct hp2 : public Engine::Component
 
 TEST_CASE("Query")
 {
-    Engine::Core::World world;
+    Engine::Core::Scene world;
     constexpr int hps = 10;
 
     struct Player : public Engine::Component

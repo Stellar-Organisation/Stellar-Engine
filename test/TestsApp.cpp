@@ -1,3 +1,32 @@
+/*
+**    _____ _       _ _                   ______             _                 *
+**   / ____| |     | | |                 |  ____|           (_)                *
+**  | (___ | |_ ___| | | __ _ _ __ ______| |__   _ __   __ _ _ _ __   ___      *
+**   \___ \| __/ _ \ | |/ _` | '__|______|  __| | '_ \ / _` | | '_ \ / _ \     *
+**   ____) | ||  __/ | | (_| | |         | |____| | | | (_| | | | | |  __/     *
+**  |_____/ \__\___|_|_|\__,_|_|         |______|_| |_|\__, |_|_| |_|\___|     *
+**                                                      __/ |                  *
+**                                                     |___/                   *
+**                                                                             *
+*
+** File: TestsApp.cpp                                                          *
+** Project: Stellar-Engine                                                     *
+** Created Date: We Feb 2024                                                   *
+** Author: GlassAlo                                                            *
+** Email: ofourpatat@gmail.com                                                 *
+** -----                                                                       *
+** Description: {Enter a description for the file}                             *
+** -----                                                                       *
+** Last Modified: Thu Feb 22 2024                                              *
+** Modified By: GlassAlo                                                       *
+** -----                                                                       *
+** Copyright (c) 2024 Stellar-Organisation                                     *
+** -----                                                                       *
+** HISTORY:                                                                    *
+** Date      	By	Comments                                                   *
+** ----------	---	---------------------------------------------------------  *
+*/
+
 #include <cstddef>
 #include <cstdio>
 #include <functional>
@@ -10,7 +39,7 @@
 TEST_CASE("App", "[App]")
 {
     Engine::App app;
-    auto world = std::make_unique<Engine::Core::World>();
+    auto world = std::make_unique<Engine::Core::Scene>();
 
     SECTION("Add a world")
     {

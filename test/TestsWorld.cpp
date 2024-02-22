@@ -1,3 +1,32 @@
+/*
+**    _____ _       _ _                   ______             _                 *
+**   / ____| |     | | |                 |  ____|           (_)                *
+**  | (___ | |_ ___| | | __ _ _ __ ______| |__   _ __   __ _ _ _ __   ___      *
+**   \___ \| __/ _ \ | |/ _` | '__|______|  __| | '_ \ / _` | | '_ \ / _ \     *
+**   ____) | ||  __/ | | (_| | |         | |____| | | | (_| | | | | |  __/     *
+**  |_____/ \__\___|_|_|\__,_|_|         |______|_| |_|\__, |_|_| |_|\___|     *
+**                                                      __/ |                  *
+**                                                     |___/                   *
+**                                                                             *
+*
+** File: TestsWorld.cpp                                                        *
+** Project: Stellar-Engine                                                     *
+** Created Date: We Feb 2024                                                   *
+** Author: GlassAlo                                                            *
+** Email: ofourpatat@gmail.com                                                 *
+** -----                                                                       *
+** Description: {Enter a description for the file}                             *
+** -----                                                                       *
+** Last Modified: Thu Feb 22 2024                                              *
+** Modified By: GlassAlo                                                       *
+** -----                                                                       *
+** Copyright (c) 2024 Stellar-Organisation                                     *
+** -----                                                                       *
+** HISTORY:                                                                    *
+** Date      	By	Comments                                                   *
+** ----------	---	---------------------------------------------------------  *
+*/
+
 #include <cstddef>
 #include <cstdio>
 #include <functional>
@@ -30,7 +59,7 @@ template<typename... Components>
 class MySystemClass : public Engine::Systems::System
 {
     public:
-        explicit MySystemClass(Engine::Core::World &world)
+        explicit MySystemClass(Engine::Core::Scene &world)
             : Engine::Systems::System(world)
         {}
 
@@ -43,7 +72,7 @@ class MySystemClass : public Engine::Systems::System
         void update() override
         {
             _world.get().template query<Components...>().forEach(
-                _clock.getElapsedTime(), [this](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t idx,
+                _clock.getElapsedTime(), [this](Engine::Core::Scene & /*world*/, double /*deltaTime*/, std::size_t idx,
                                                 Components &...components) {
                     this->updateSystem(_world.get(), _clock.getElapsedTime(), idx, components...);
                 });
@@ -51,7 +80,7 @@ class MySystemClass : public Engine::Systems::System
         }
 
     private:
-        void updateSystem(Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &hp1Comp,
+        void updateSystem(Engine::Core::Scene & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &hp1Comp,
                           hp2 &hp2Comp)
         {
             hp1Comp.hp--;
@@ -61,7 +90,7 @@ class MySystemClass : public Engine::Systems::System
 
 TEST_CASE("World", "[World]")
 {
-    Engine::Core::World world;
+    Engine::Core::Scene world;
 
     SECTION("Create an entity")
     {
@@ -111,7 +140,7 @@ TEST_CASE("World", "[World]")
         constexpr int hps = 10;
         auto MySystem = Engine::Systems::createSystem<hp1, hp2>(
             world, "MySystem",
-            [](Engine::Core::World & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &cop1, hp2 &cop2) {
+            [](Engine::Core::Scene & /*world*/, double /*deltaTime*/, std::size_t /*idx*/, hp1 &cop1, hp2 &cop2) {
                 cop1.hp--;
                 cop2.maxHp -= 2;
             });

@@ -48,9 +48,7 @@ namespace Engine::Core {
             newIdx = *smallestIdx;
         }
         spdlog::debug("Creating entity {}", newIdx);
-        for (const auto &component : _components) {
-            component.second->init(newIdx);
-        }
+        _components.init(newIdx);
         return newIdx;
     }
 
@@ -59,9 +57,7 @@ namespace Engine::Core {
         spdlog::debug("Killing entity {}", aIndex);
         _ids.push_back(aIndex);
 
-        for (const auto &component : _components) {
-            component.second->erase(aIndex);
-        }
+        _components.erase(aIndex);
     }
 
     std::size_t Scene::getNextEntityId() const

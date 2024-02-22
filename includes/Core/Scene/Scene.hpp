@@ -35,7 +35,7 @@
 #include <memory>
 #include <typeindex>
 #include <vector>
-#include "Components/SparseArray.hpp"
+#include "Components/SparseArraysManager.hpp"
 #include "Exception.hpp"
 #include "Systems/SystemsManager.hpp"
 #include <boost/container/flat_map.hpp>
@@ -58,8 +58,8 @@ namespace Engine::Core {
         public:
             //------------------- SCENE ALIAS -------------------//
             //------------------- SCENE ALIAS - COMPONENTS -------------------//
-            using container = std::unique_ptr<ISparseArray>;
-            using containerMap = boost::container::flat_map<std::type_index, container>;
+            using container = Components::SparseArraysManager::container;
+            using containerMap = Components::SparseArraysManager::containerMap;
 
             //------------------- SCENE ALIAS - ENTITIES -------------------//
             using id = std::size_t;
@@ -73,7 +73,7 @@ namespace Engine::Core {
         protected:
             //------------------- SCENE ATTRIBUTES -------------------//
             //------------------- SCENE ATTRIBUTES - COMPONENTS -------------------//
-            containerMap _components;
+            Components::SparseArraysManager _components;
 
             //------------------- SCENE ATTRIBUTES - ENTITIES -------------------//
             idsContainer _ids;
@@ -184,7 +184,7 @@ namespace Engine::Core {
              * @tparam Components The components to register to the scene, must inherit from Component
              */
             template<ComponentConcept... Components>
-            void registerComponents();
+            auto registerComponents();
 
             /**
              * @brief Get the component of the given type

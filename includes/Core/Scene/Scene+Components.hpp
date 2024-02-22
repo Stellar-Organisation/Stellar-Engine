@@ -41,89 +41,55 @@ namespace Engine::Core {
     template<ComponentConcept Component>
     SparseArray<Component> &Scene::registerComponent()
     {
-        auto typeIndex = std::type_index(typeid(Component));
-
-        if (_components.find(typeIndex) != _components.end()) {
-            throw SceneExceptionComponentAlreadyRegistered("Component already registered");
-        }
-        _components[typeIndex] = std::make_unique<SparseArray<Component>>();
-
-        for (std::size_t idx = 0; idx < _nextId; idx++) {
-            _components[typeIndex]->init(idx);
-        }
-
-        return static_cast<SparseArray<Component> &>(*_components[typeIndex]);
+        return _components.registerComponent<Component>(_nextId);
     }
 
     template<ComponentConcept... Component>
-    void Scene::registerComponents()
+    auto Scene::registerComponents()
     {
-        (registerComponent<Component>(), ...);
+        return std::tuple<SparseArray<Component> &...> {registerComponent<Component>()...};
     }
 
     template<ComponentConcept Component>
     SparseArray<Component> &Scene::getComponent()
     {
-        auto typeIndex = std::type_index(typeid(Component));
-
-        if (_components.find(typeIndex) == _components.end()) {
-            throw SceneExceptionComponentNotRegistered("Component not registered");
-        }
-        return static_cast<SparseArray<Component> &>(*_components[typeIndex]);
+        return _components.getComponent<Component>();
     }
 
     template<ComponentConcept Component>
     SparseArray<Component> const &Scene::getComponent() const
     {
-        auto typeIndex = std::type_index(typeid(Component));
-
-        if (_components.find(typeIndex) == _components.end()) {
-            throw SceneExceptionComponentNotRegistered("Component not registered");
-        }
-        return static_cast<SparseArray<Component> const &>(*_components.at(typeIndex));
+        return _components.getComponent<Component>();
     }
 
     template<ComponentConcept... Components>
     [[nodiscard]] bool Scene::hasComponents(std::size_t aIndex) const
     {
-        return (... && getComponent<Components>().has(aIndex));
+        return (_components.hasComponents<Components>(aIndex) && ...);
     }
 
     template<ComponentConcept Component>
     void Scene::removeComponent()
     {
-        auto typeIndex = std::type_index(typeid(Component));
-
-        if (_components.find(typeIndex) == _components.end()) {
-            throw SceneExceptionComponentNotRegistered("Component not registered");
-        }
-        _components.erase(typeIndex);
+        _components.removeComponent<Component>();
     }
 
     template<ComponentConcept Component>
     Component &Scene::addComponentToEntity(std::size_t aIndex, Component &&aComponent)
     {
-        auto &component = getComponent<Component>();
-
-        component.set(aIndex, std::forward<Component>(aComponent));
-        return component.get(aIndex);
+        return _components.addComponentToEntity<Component>(aIndex, std::forward<Component>(aComponent));
     }
 
     template<ComponentConcept Component, typename... Args>
     Component &Scene::emplaceComponentToEntity(std::size_t aIndex, Args &&...aArgs)
     {
-        auto &component = getComponent<Component>();
-
-        component.emplace(aIndex, std::forward<Args>(aArgs)...);
-        return component.get(aIndex);
+        return _components.emplaceComponentToEntity<Component>(aIndex, std::forward<Args>(aArgs)...);
     }
 
     template<ComponentConcept Component>
     void Scene::removeComponentFromEntity(std::size_t aIndex)
     {
-        auto &component = getComponent<Component>();
-
-        component.erase(aIndex);
+        _components.removeComponentFromEntity<Component>(aIndex);
     }
 } // namespace Engine::Core
 

@@ -1,10 +1,39 @@
+/*
+**    _____ _       _ _                   ______             _                 *
+**   / ____| |     | | |                 |  ____|           (_)                *
+**  | (___ | |_ ___| | | __ _ _ __ ______| |__   _ __   __ _ _ _ __   ___      *
+**   \___ \| __/ _ \ | |/ _` | '__|______|  __| | '_ \ / _` | | '_ \ / _ \     *
+**   ____) | ||  __/ | | (_| | |         | |____| | | | (_| | | | | |  __/     *
+**  |_____/ \__\___|_|_|\__,_|_|         |______|_| |_|\__, |_|_| |_|\___|     *
+**                                                      __/ |                  *
+**                                                     |___/                   *
+**                                                                             *
+*
+** File: App.hpp                                                               *
+** Project: Stellar-Engine                                                     *
+** Created Date: We Feb 2024                                                   *
+** Author: GlassAlo                                                            *
+** Email: ofourpatat@gmail.com                                                 *
+** -----                                                                       *
+** Description: {Enter a description for the file}                             *
+** -----                                                                       *
+** Last Modified: Thu Feb 22 2024                                              *
+** Modified By: GlassAlo                                                       *
+** -----                                                                       *
+** Copyright (c) 2024 Stellar-Organisation                                     *
+** -----                                                                       *
+** HISTORY:                                                                    *
+** Date      	By	Comments                                                   *
+** ----------	---	---------------------------------------------------------  *
+*/
+
 #ifndef APP_HPP_
 #define APP_HPP_
 
 #include <memory>
 #include "Core/Events/Event.hpp"
 #include "Exception.hpp"
-#include "World/World.hpp"
+#include "Scene/Scene.hpp"
 #include <boost/container/flat_map.hpp>
 
 namespace Engine {
@@ -21,12 +50,12 @@ namespace Engine {
     class App
     {
         public:
-            using world = std::unique_ptr<Core::World>;
-            using worlds = boost::container::flat_map<Key, world>;
+            using scene = std::unique_ptr<Core::Scene>;
+            using scenes = boost::container::flat_map<Key, scene>;
 
         private:
-            worlds _worlds;
-            Key _currentWorld;
+            scenes _scenes;
+            Key _currentScenes;
 
         public:
 #pragma region constructors / destructors
@@ -41,12 +70,12 @@ namespace Engine {
 #pragma endregion constructors / destructors
 
 #pragma region operators
-            world &operator[](const Key &aKey)
+            scene &operator[](const Key &aKey)
             {
-                if (_worlds.find(aKey) == _worlds.end()) {
+                if (_scenes.find(aKey) == _scenes.end()) {
                     throw AppExceptionKeyNotFound("The key doesn't exist");
                 }
-                return _worlds[aKey];
+                return _scenes[aKey];
             }
 #pragma endregion operators
 
@@ -58,13 +87,13 @@ namespace Engine {
              * @param aWorld The world to add
              * @throw AppExceptionKeyAlreadyExists If the key already exists
              */
-            world &addWorld(const Key &aKey, world &&aWorld)
+            scene &addWorld(const Key &aKey, scene &&aWorld)
             {
-                if (_worlds.find(aKey) != _worlds.end()) {
+                if (_scenes.find(aKey) != _scenes.end()) {
                     throw AppExceptionKeyAlreadyExists("The key already exists");
                 }
-                _worlds[aKey] = std::move(aWorld);
-                return _worlds[aKey];
+                _scenes[aKey] = std::move(aWorld);
+                return _scenes[aKey];
             }
 
             /**
@@ -73,13 +102,13 @@ namespace Engine {
              * @param key The key of the world
              * @throw AppExceptionKeyAlreadyExists If the key already exists
              */
-            world &addWorld(const Key &aKey)
+            scene &addWorld(const Key &aKey)
             {
-                if (_worlds.find(aKey) != _worlds.end()) {
+                if (_scenes.find(aKey) != _scenes.end()) {
                     throw AppExceptionKeyAlreadyExists("The key already exists");
                 }
-                _worlds[aKey] = std::make_unique<Core::World>();
-                return _worlds[aKey];
+                _scenes[aKey] = std::make_unique<Core::Scene>();
+                return _scenes[aKey];
             }
 
             /**
@@ -90,10 +119,10 @@ namespace Engine {
              */
             void removeWorld(const Key &aKey)
             {
-                if (_worlds.find(aKey) == _worlds.end()) {
+                if (_scenes.find(aKey) == _scenes.end()) {
                     throw AppExceptionKeyNotFound("The key doesn't exist");
                 }
-                _worlds.erase(aKey);
+                _scenes.erase(aKey);
             }
 
             /**
@@ -102,12 +131,12 @@ namespace Engine {
              * @throw AppExceptionKeyNotFound If the key doesn't exist
              * @return The current world
              */
-            [[nodiscard]] const world &getCurrentWorld() const
+            [[nodiscard]] const scene &getCurrentWorld() const
             {
-                if (_worlds.find(_currentWorld) == _worlds.end()) {
+                if (_scenes.find(_currentScenes) == _scenes.end()) {
                     throw AppExceptionKeyNotFound("The key doesn't exist");
                 }
-                return _worlds.at(_currentWorld);
+                return _scenes.at(_currentScenes);
             }
 
             /**
@@ -115,12 +144,12 @@ namespace Engine {
              * @throw AppExceptionKeyNotFound If the key doesn't exist
              * @return The current world
              */
-            [[nodiscard]] world &getCurrentWorld()
+            [[nodiscard]] scene &getCurrentWorld()
             {
-                if (_worlds.find(_currentWorld) == _worlds.end()) {
+                if (_scenes.find(_currentScenes) == _scenes.end()) {
                     throw AppExceptionKeyNotFound("The key doesn't exist");
                 }
-                return _worlds.at(_currentWorld);
+                return _scenes.at(_currentScenes);
             }
 
             /**
@@ -130,10 +159,10 @@ namespace Engine {
              */
             void setCurrentWorld(const Key &key)
             {
-                if (_worlds.find(key) == _worlds.end()) {
+                if (_scenes.find(key) == _scenes.end()) {
                     throw AppExceptionKeyNotFound("The key doesn't exist");
                 }
-                _currentWorld = key;
+                _currentScenes = key;
             }
 #pragma endregion methods
     };
